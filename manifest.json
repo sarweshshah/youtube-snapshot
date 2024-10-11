@@ -1,0 +1,28 @@
+{
+    "manifest_version": 3, 
+    "name": "YouTube Snapshot",
+    "version": "1.0",
+    "description": "Take snapshots of YouTube videos and save them locally.",
+    "permissions": [
+        "activeTab", 
+        "scripting",
+        "storage"
+    ],
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://www.youtube.com/watch*"],
+            "js": ["content.js"]
+        }
+    ],
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    }
+}

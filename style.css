@@ -1,0 +1,12 @@
+#snapshotButton {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 10px;
+  }
+  
+  #snapshotButton:hover {
+    opacity: 0.8;
+  }

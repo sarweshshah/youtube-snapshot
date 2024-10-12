@@ -5,12 +5,8 @@
     "description": "Take snapshots of YouTube videos and save them locally.",
     "permissions": [
         "activeTab", 
-        "scripting",
-        "storage"
+        "scripting"
     ],
-    "action": {
-      "default_popup": "popup.html"
-    },
     "background": {
       "service_worker": "background.js"
     },

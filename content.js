@@ -1,14 +1,5 @@
 'use strict'
 
-// Wait for the YouTube video player to load
-const waitForPlayer = setInterval(() => {
-    const ytvideo = document.querySelector('video');
-    if (ytvideo) {
-        clearInterval(waitForPlayer);
-        addSnapshotButton();
-    }
-}, 100);
-
 // Wait for the video player to load
 function addSnapshotButton() {
     const controls = document.querySelector('.ytp-right-controls');
@@ -23,14 +14,20 @@ function addSnapshotButton() {
     // Create the snapshot button
     const snapshotButton = document.createElement('button');
     snapshotButton.id = 'snapshotButton';
-    snapshotButton.className = "snapshotButton ytp-button";
-    snapshotButton.innerHTML = '📸'; // Emoji for camera icon
-    // snapshotButton.style.backgroundImage = 'url("icons/your-icon.png")';
+    // snapshotButton.className = "snapshotButton ytp-button";
     snapshotButton.title = 'Take Snapshot';
 
-    // Style the button (optional)
-    // snapshotButton.style.cssFloat = "left";
-    // Add more styles as needed
+    // Style the button with an image (camera icon)
+    snapshotButton.style.backgroundImage = 'url("' + chrome.runtime.getURL('icons/snapshot.png') + '")';
+    snapshotButton.style.backgroundSize = 'contain';
+    snapshotButton.style.backgroundRepeat = 'no-repeat';
+    snapshotButton.style.backgroundPosition = 'center';
+    snapshotButton.style.width = '50px';  // Set button size
+    snapshotButton.style.height = '50px';
+    snapshotButton.style.border = 'none';
+    snapshotButton.style.cursor = 'pointer';
+    snapshotButton.style.padding = '0';
+    snapshotButton.style.margin = '0';
     
     // Add the button to the controls
     controls.insertBefore(snapshotButton, controls.firstChild);

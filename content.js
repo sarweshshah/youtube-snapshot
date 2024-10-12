@@ -1,35 +1,38 @@
-'use strict'
-
-// Wait for the video player to load
 function addSnapshotButton() {
     const controls = document.querySelector('.ytp-right-controls');
     if (!controls) {
-        setTimeout(addSnapshotButton, 1000); // Retry until controls are found
+        setTimeout(addSnapshotButton, 1000);
         return;
     }
 
-    // Check if the button is already added
     if (document.getElementById('snapshotButton')) return;
 
     // Create the snapshot button
     const snapshotButton = document.createElement('button');
     snapshotButton.id = 'snapshotButton';
-    // snapshotButton.className = "snapshotButton ytp-button";
     snapshotButton.title = 'Take Snapshot';
 
-    // Style the button with an image (camera icon)
-    snapshotButton.style.backgroundImage = 'url("' + chrome.runtime.getURL('icons/snapshot.png') + '")';
-    snapshotButton.style.backgroundSize = 'contain';
-    snapshotButton.style.backgroundRepeat = 'no-repeat';
-    snapshotButton.style.backgroundPosition = 'center';
-    snapshotButton.style.width = '50px';  // Set button size
-    snapshotButton.style.height = '50px';
-    snapshotButton.style.border = 'none';
-    snapshotButton.style.cursor = 'pointer';
-    snapshotButton.style.padding = '0';
-    snapshotButton.style.margin = '0';
-    
-    // Add the button to the controls
+    // Style the button to ensure proper dimensions and visibility
+    snapshotButton.style.width = '36px';   // Adjust button size
+    snapshotButton.style.height = '36px';
+    snapshotButton.style.border = 'none';  // Remove default border
+    snapshotButton.style.background = 'transparent';  // Transparent background
+    snapshotButton.style.cursor = 'pointer';  // Pointer cursor for interactivity
+    snapshotButton.style.padding = '0';    // Remove default padding
+    snapshotButton.style.margin = '0';     // Ensure no margin
+
+    // Create the img element for the button icon
+    const img = document.createElement('img');
+    img.src = chrome.runtime.getURL('icons/snapshot-icon.png');  // Updated image path
+    img.alt = 'Take Snapshot';  // Accessibility
+    img.style.width = '100%';  // Make image fill the button
+    img.style.height = '100%';
+    img.style.display = 'block';  // Remove inline image spacing issue
+
+    // Insert the image inside the button
+    snapshotButton.appendChild(img);
+
+    // Insert the button into the YouTube controls
     controls.insertBefore(snapshotButton, controls.firstChild);
 
     // Add click event to capture video frame
@@ -37,7 +40,7 @@ function addSnapshotButton() {
         const ytvideo = document.querySelector('video');
         if (!ytvideo) return;
 
-        // Create a canvas and draw the current frame
+        // Create a canvas and capture the current video frame
         const canvas = document.createElement('canvas');
         canvas.width = ytvideo.videoWidth;
         canvas.height = ytvideo.videoHeight;
@@ -46,8 +49,8 @@ function addSnapshotButton() {
 
         // Convert canvas to image and trigger download
         const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.download = 'snapshot.png';
+        link.href = dataURL;
+        link.download = 'snapshot.png';  // Use fixed default filename
         link.click();
     });
 }

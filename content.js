@@ -11,6 +11,7 @@ function addSnapshotButton() {
     const snapshotButton = document.createElement('button');
     snapshotButton.id = 'snapshotButton';
     snapshotButton.title = 'Take Snapshot';
+    // snapshotButton.innerHTML = "📸"
 
     // Style the button to ensure proper dimensions and visibility
     snapshotButton.style.width = '36px';   // Adjust button size
@@ -24,7 +25,6 @@ function addSnapshotButton() {
     // Create the img element for the button icon
     const img = document.createElement('img');
     img.src = chrome.runtime.getURL('icons/snapshot-icon.png');  // Updated image path
-    img.alt = 'Take Snapshot';  // Accessibility
     img.style.width = '100%';  // Make image fill the button
     img.style.height = '100%';
     img.style.display = 'block';  // Remove inline image spacing issue

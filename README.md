@@ -16,9 +16,9 @@ The Extension does **not** collect, store, or transmit any personal information 
 
 **Permissions**\
 The Extension requests the following permissions:
-- **"activeTab"**: This permission allows the Extension to access the currently active YouTube tab to inject the snapshot button and capture the video frame.
-- **"scripting"**: This permission allows the Extension to inject JavaScript code into the YouTube webpage to add the snapshot button and handle its functionality.
-- **"youtube.com"**: This permission allows the Extension to interact with the YouTube video player and enable the snapshot functionality.
+- **Active Tabs**: This permission allows the Extension to access the currently active YouTube tab to inject the snapshot button and capture the video frame.
+- **Scripting**: This permission allows the Extension to inject JavaScript code into the YouTube webpage to add the snapshot button and handle its functionality.
+- **Host permissions for youtube.com**: This permission allows the Extension to interact with the YouTube video player and enable the snapshot functionality.
 
 **How We Use Information**\
 The Extension uses the granted permissions solely to enable its core functionality: capturing a snapshot of the current YouTube video frame and saving it as an image file on your local device. No data is transmitted or stored outside of your browser.

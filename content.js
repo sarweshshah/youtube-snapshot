@@ -11,7 +11,6 @@ function addSnapshotButton() {
     const snapshotButton = document.createElement('button');
     snapshotButton.id = 'snapshotButton';
     snapshotButton.title = 'Take Snapshot';
-    // snapshotButton.innerHTML = "📸"
 
     // Style the button to ensure proper dimensions and visibility
     snapshotButton.style.position = 'relative';
@@ -41,6 +40,19 @@ function addSnapshotButton() {
         const ytvideo = document.querySelector('video');
         if (!ytvideo) return;
 
+        // Fetch YouTube video title from <title> tag in <head>
+        const videoTitle = getTitleFromHeadTag();
+
+        // Get the current time of the video
+        const currentTime = ytvideo.currentTime;
+        const formattedTime = formatTime(currentTime);
+
+        // Sanitize the video title to make it filename-friendly
+        const sanitizedTitle = videoTitle.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_');
+
+        // Generate a dynamic filename
+        const filename = `${sanitizedTitle}_${formattedTime}.png`;
+
         // Create a canvas and capture the current video frame
         const canvas = document.createElement('canvas');
         canvas.width = ytvideo.videoWidth;
@@ -52,9 +64,31 @@ function addSnapshotButton() {
         const dataURL = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = dataURL;
-        link.download = 'snapshot.png';  // Use fixed default filename
+        link.download = filename;  // Use generated filename
         link.click();
     });
+}
+
+// Function to fetch the video title from the <title> tag
+function getTitleFromHeadTag() {
+    let title = document.title;
+
+    // Remove leading notification count, e.g., (2) from the title
+    title = title.replace(/^\(\d+\)\s*/, '');
+
+    // YouTube usually appends " - YouTube" to the title, so we strip it off
+    if (title.endsWith(' - YouTube')) {
+        title = title.replace(' - YouTube', '');
+    }
+
+    return title.trim();  // Return the cleaned-up title
+}
+
+// Helper function to format time as HH-MM-SS
+function formatTime(seconds) {
+    const date = new Date(0);
+    date.setSeconds(seconds);
+    return date.toISOString().substring(11, 19).replace(/:/g, '-');  // Format as HH-MM-SS
 }
 
 // Run the function to inject the button

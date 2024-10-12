@@ -8,10 +8,6 @@ This simple and lightweight extension adds a "Snapshot" button to the YouTube vi
 - **Local Saving**: Downloaded images are saved directly to your device.
 - **No Fuss**: No complex settings or configurations, just pure snapshotting power.
 
-This extension only interacts with the YouTube website and does not collect or share any of your personal data.
-
-Enjoy capturing and saving your favorite YouTube moments!
-
 ## Privacy Policy for YouTube Snapshot Extension
 This Privacy Policy describes how the YouTube Snapshot Chrome extension ("the Extension") handles your information.
 

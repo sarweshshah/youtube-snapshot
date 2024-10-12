@@ -1,3 +1,4 @@
+// Wait for the video player to load
 function addSnapshotButton() {
     const controls = document.querySelector('.ytp-right-controls');
     if (!controls) {
@@ -5,48 +6,44 @@ function addSnapshotButton() {
         return;
     }
 
+    // Check if the button is already added
     if (document.getElementById('snapshotButton')) return;
 
+    // Create the snapshot button
     const snapshotButton = document.createElement('button');
     snapshotButton.id = 'snapshotButton';
-    snapshotButton.className = "snapshotButton ytp-button";
-    snapshotButton.innerHTML = '📸';
+    snapshotButton.innerHTML = '📸'; // Emoji for camera icon
     snapshotButton.title = 'Take Snapshot';
-    controls.insertBefore(snapshotButton, controls.firstChild);
 
     // Style the button (optional)
     snapshotButton.style.position = 'relative';
-    snapshotButton.style.bottom = '0px';
-    snapshotButton.style.right = '0px';
+    snapshotButton.style.bottom = 'Opx';
+    snapshotButton.style.right = 'Opx';
     snapshotButton.style.cssFloat = "left";
     // Add more styles as needed
 
+    // Add the button to the controls
+    controls.insertBefore(snapshotButton, controls.firstChild);
+
+    // Add click event to capture video frame
     snapshotButton.addEventListener('click', () => {
         const video = document.querySelector('video');
         if (!video) return;
 
-        // Fetch user preferences from Chrome's local storage
-        chrome.storage.local.get(['filename', 'format'], (result) => {
-            const filename = result.filename || 'snapshot';
-            const format = result.format || 'png';
+        // Create a canvas and draw the current frame
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // Create a canvas and capture the current video frame
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Convert canvas to the selected format
-            const dataURL = canvas.toDataURL(`image/${format}`);
-            
-            // Create a download link for the snapshot
-            const link = document.createElement('a');
-            link.href = dataURL;
-            link.download = `${filename}.${format}`;
-            link.click();
-        });
+        // Convert canvas to image and trigger download
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'snapshot.png';
+        link.click();
     });
 }
 
+// Run the function to inject the button
 addSnapshotButton();

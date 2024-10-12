@@ -14,8 +14,9 @@ function addSnapshotButton() {
     // snapshotButton.innerHTML = "📸"
 
     // Style the button to ensure proper dimensions and visibility
-    snapshotButton.style.width = '36px';   // Adjust button size
-    snapshotButton.style.height = '36px';
+    snapshotButton.style.position = 'relative';
+    snapshotButton.style.width = '48px';   // Adjust button size
+    snapshotButton.style.height = '48px';
     snapshotButton.style.border = 'none';  // Remove default border
     snapshotButton.style.background = 'transparent';  // Transparent background
     snapshotButton.style.cursor = 'pointer';  // Pointer cursor for interactivity
@@ -25,9 +26,9 @@ function addSnapshotButton() {
     // Create the img element for the button icon
     const img = document.createElement('img');
     img.src = chrome.runtime.getURL('icons/snapshot-icon.png');  // Updated image path
-    img.style.width = '100%';  // Make image fill the button
-    img.style.height = '100%';
-    img.style.display = 'block';  // Remove inline image spacing issue
+    img.style.width = '50%';  // Make image fill the button
+    img.style.height = '50%';
+    img.style.display = 'flex';  // Remove inline image spacing issue
 
     // Insert the image inside the button
     snapshotButton.appendChild(img);

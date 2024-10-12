@@ -11,3 +11,32 @@ This simple and lightweight extension adds a "Snapshot" button to the YouTube vi
 This extension only interacts with the YouTube website and does not collect or share any of your personal data.
 
 Enjoy capturing and saving your favorite YouTube moments!
+
+## Privacy Policy for YouTube Snapshot Extension
+This Privacy Policy describes how the YouTube Snapshot Chrome extension ("the Extension") handles your information.
+
+**Information We Collect**\
+The Extension does **not** collect, store, or transmit any personal information or browsing data. It operates solely within your browser and interacts only with the active YouTube video page.
+
+**Permissions**\
+The Extension requests the following permissions:
+- **"activeTab"**: This permission allows the Extension to access the currently active YouTube tab to inject the snapshot button and capture the video frame.
+- **"scripting"**: This permission allows the Extension to inject JavaScript code into the YouTube webpage to add the snapshot button and handle its functionality.
+- **"youtube.com"**: This permission allows the Extension to interact with the YouTube video player and enable the snapshot functionality.
+
+**How We Use Information**\
+The Extension uses the granted permissions solely to enable its core functionality: capturing a snapshot of the current YouTube video frame and saving it as an image file on your local device. No data is transmitted or stored outside of your browser.
+
+**Third-Party Sharing**\
+The Extension does not share any information with third-party services or websites.
+
+**Data Security**\
+Since the Extension does not collect or store any user data, there is no user data to secure. However, the Extension's code is regularly reviewed to ensure it functions as intended and does not pose any security risks.
+
+**Changes to this Privacy Policy**\
+This Privacy Policy may be updated from time to time. Any updates will be posted on the Extension's page on the Chrome Web Store.
+
+**Contact Us**\
+If you have any questions or concerns about this Privacy Policy, please contact us through the Chrome Web Store.
+
+**Effective Date:** October 12, 2024

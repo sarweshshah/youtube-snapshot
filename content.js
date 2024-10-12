@@ -49,6 +49,7 @@ function addSnapshotButton() {
         ctx.drawImage(ytvideo, 0, 0, canvas.width, canvas.height);
 
         // Convert canvas to image and trigger download
+        const dataURL = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = dataURL;
         link.download = 'snapshot.png';  // Use fixed default filename

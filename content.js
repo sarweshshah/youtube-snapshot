@@ -24,9 +24,9 @@ function addSnapshotButton() {
 
     // Create the img element for the button icon
     const img = document.createElement('img');
-    img.src = chrome.runtime.getURL('icons/snapshot-icon.png');  // Updated image path
-    img.style.width = '50%';  // Make image fill the button
-    img.style.height = '50%';
+    img.src = chrome.runtime.getURL('icons/snapshot-icon_1.png');  // Updated image path
+    img.style.width = '55%';  // Make image fill the button
+    img.style.height = '52%';
     img.style.display = 'flex';  // Remove inline image spacing issue
 
     // Insert the image inside the button

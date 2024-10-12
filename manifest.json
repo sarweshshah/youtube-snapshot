@@ -28,7 +28,7 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "icons/snapshot-icon.png"
+                "icons/snapshot-icon_1.png"
             ],
             "matches": [
                 "https://www.youtube.com/*"

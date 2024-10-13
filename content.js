@@ -48,10 +48,10 @@ function addSnapshotButton() {
         const formattedTime = formatTime(currentTime);
 
         // Sanitize the video title to make it filename-friendly
-        const sanitizedTitle = videoTitle.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_');
+        const sanitizedTitle = videoTitle.replace(/[^\w\s]/gi, '').replace(/\s+/g, ' ');
 
         // Generate a dynamic filename
-        const filename = `${sanitizedTitle}_${formattedTime}.png`;
+        const filename = `${sanitizedTitle} [${formattedTime}].png`;
 
         // Create a canvas and capture the current video frame
         const canvas = document.createElement('canvas');

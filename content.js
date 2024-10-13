@@ -88,7 +88,7 @@ function getTitleFromHeadTag() {
 function formatTime(seconds) {
     const date = new Date(0);
     date.setSeconds(seconds);
-    return date.toISOString().substring(11, 19).replace(/:/g, '-');  // Format as HH-MM-SS
+    return date.toISOString().substring(11, 19).replace(/:/g, '.');  // Format as HH.MM.SS
 }
 
 // Run the function to inject the button

@@ -109,6 +109,3 @@ function formatTime(seconds) {
     date.setSeconds(seconds);
     return date.toISOString().substring(11, 19).replace(/:/g, '.');  // Format as HH.MM.SS
 }
-
-// Run the function to inject the button
-addSnapshotButton();

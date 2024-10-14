@@ -1,11 +1,28 @@
-function addSnapshotButton() {
-    const controls = document.querySelector('.ytp-right-controls');
-    if (!controls) {
-        setTimeout(addSnapshotButton, 2000);
-        return;
-    }
+// Wait for the page to completely load before injecting the button
+window.onload = function () {
+    waitForControlsAndInject();
+};
 
-    if (document.getElementById('snapshotButton')) return;
+function waitForControlsAndInject() {
+    const controls = document.querySelector('.ytp-right-controls');
+
+    // If controls are not found, keep checking every 500ms
+    if (!controls) {
+        const intervalId = setInterval(() => {
+            const controls = document.querySelector('.ytp-right-controls');
+            if (controls) {
+                clearInterval(intervalId);  // Stop checking once controls are found
+                injectButton(controls);
+            }
+        }, 500);  // Retry every 500ms
+    } else {
+        // If controls are already available, inject the button immediately
+        injectButton(controls);
+    }
+}
+
+function injectButton(controls) {
+    if (document.getElementById('snapshotButton')) return;  // Avoid duplicate buttons
 
     // Create the snapshot button
     const snapshotButton = document.createElement('button');

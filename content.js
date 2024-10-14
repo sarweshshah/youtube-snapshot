@@ -1,7 +1,7 @@
 function addSnapshotButton() {
     const controls = document.querySelector('.ytp-right-controls');
     if (!controls) {
-        setTimeout(addSnapshotButton, 1000);
+        setTimeout(addSnapshotButton, 2000);
         return;
     }
 
@@ -19,16 +19,16 @@ function addSnapshotButton() {
     snapshotButton.style.background = 'transparent';  // Transparent background
     snapshotButton.style.cursor = 'pointer';  // Pointer cursor for interactivity
     snapshotButton.style.padding = '0';    // Remove default padding
-    snapshotButton.style.margin = '-12px';     // Ensure no margin
+    snapshotButton.style.margin = '0';     // Ensure no margin
     snapshotButton.onmouseover = () => snapshotButton.style.opacity = 0.8;
     snapshotButton.onmouseout = () => snapshotButton.style.opacity = 1;
 
     // Create the img element for the button icon
     const img = document.createElement('img');
     img.src = chrome.runtime.getURL('icons/snapshot-icon_1.png');  // Updated image path
-    img.style.width = '55%';  // Make image fill the button
-    img.style.height = '52%';
-    img.style.display = 'flex';  // Remove inline image spacing issue
+    img.style.width = '50%';  // Make image fill the button
+    img.style.height = '48%';
+    img.style.display = 'block';  // Remove inline image spacing issue
 
     // Insert the image inside the button
     snapshotButton.appendChild(img);

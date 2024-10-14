@@ -13,14 +13,15 @@ function addSnapshotButton() {
     snapshotButton.title = 'Take Snapshot';
 
     // Style the button to ensure proper dimensions and visibility
-    snapshotButton.style.position = 'relative';
     snapshotButton.style.width = '48px';   // Adjust button size
     snapshotButton.style.height = '48px';
     snapshotButton.style.border = 'none';  // Remove default border
     snapshotButton.style.background = 'transparent';  // Transparent background
     snapshotButton.style.cursor = 'pointer';  // Pointer cursor for interactivity
     snapshotButton.style.padding = '0';    // Remove default padding
-    snapshotButton.style.margin = '0';     // Ensure no margin
+    snapshotButton.style.margin = '-12px';     // Ensure no margin
+    snapshotButton.onmouseover = () => snapshotButton.style.opacity = 0.8;
+    snapshotButton.onmouseout = () => snapshotButton.style.opacity = 1;
 
     // Create the img element for the button icon
     const img = document.createElement('img');
@@ -48,7 +49,8 @@ function addSnapshotButton() {
         const formattedTime = formatTime(currentTime);
 
         // Sanitize the video title to make it filename-friendly
-        const sanitizedTitle = videoTitle.replace(/[^\w\s]/gi, '').replace(/\s+/g, ' ');
+        // const sanitizedTitle = videoTitle.replace(/[^\w\s]/gi, '').replace(/\s+/g, ' ');
+        const sanitizedTitle = videoTitle.trim();
 
         // Generate a dynamic filename
         const filename = `${sanitizedTitle} [${formattedTime}].png`;

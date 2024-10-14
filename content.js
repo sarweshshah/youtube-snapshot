@@ -1,6 +1,8 @@
 // Wait for the page to completely load before injecting the button
 window.onload = function () {
     waitForControlsAndInject();
+    // Add keyboard shortcut listener
+    addKeyboardShortcut();
 };
 
 function waitForControlsAndInject() {
@@ -43,7 +45,7 @@ function injectButton(controls) {
     // Create the img element for the button icon
     const img = document.createElement('img');
     img.src = chrome.runtime.getURL('icons/snapshot-icon_1.png');  // Updated image path
-    img.style.width = 'auto';
+    img.style.width = 'auto';  // Make image fill the button
     img.style.height = '50%';
     img.style.display = 'block';  // Remove inline image spacing issue
 
@@ -54,38 +56,51 @@ function injectButton(controls) {
     controls.insertBefore(snapshotButton, controls.firstChild);
 
     // Add click event to capture video frame
-    snapshotButton.addEventListener('click', () => {
-        const ytvideo = document.querySelector('video');
-        if (!ytvideo) return;
+    snapshotButton.addEventListener('click', takeSnapshot);
+}
 
-        // Fetch YouTube video title from <title> tag in <head>
-        const videoTitle = getTitleFromHeadTag();
-
-        // Get the current time of the video
-        const currentTime = ytvideo.currentTime;
-        const formattedTime = formatTime(currentTime);
-
-        // Sanitize the video title to make it filename-friendly
-        // const sanitizedTitle = videoTitle.replace(/[^\w\s]/gi, '').replace(/\s+/g, ' ');
-        const sanitizedTitle = videoTitle.trim();
-
-        // Generate a dynamic filename
-        const filename = `${sanitizedTitle} [${formattedTime}].png`;
-
-        // Create a canvas and capture the current video frame
-        const canvas = document.createElement('canvas');
-        canvas.width = ytvideo.videoWidth;
-        canvas.height = ytvideo.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(ytvideo, 0, 0, canvas.width, canvas.height);
-
-        // Convert canvas to image and trigger download
-        const dataURL = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = dataURL;
-        link.download = filename;  // Use generated filename
-        link.click();
+// Add keyboard shortcut functionality
+function addKeyboardShortcut() {
+    document.addEventListener('keydown', (event) => {
+        // Check if the 's' key is pressed (case insensitive)
+        if (event.key.toLowerCase() === 's') {
+            takeSnapshot();
+        }
     });
+}
+
+// Function to capture the snapshot (shared by both button click and 's' key press)
+function takeSnapshot() {
+    const ytvideo = document.querySelector('video');
+    if (!ytvideo) return;
+
+    // Fetch YouTube video title from <title> tag in <head>
+    const videoTitle = getTitleFromHeadTag();
+
+    // Get the current time of the video
+    const currentTime = ytvideo.currentTime;
+    const formattedTime = formatTime(currentTime);
+
+    // Sanitize the video title to make it filename-friendly
+    // const sanitizedTitle = videoTitle.replace(/[^\w\s]/gi, '').replace(/\s+/g, ' ');
+    const sanitizedTitle = videoTitle.trim();
+
+    // Generate a dynamic filename
+    const filename = `${sanitizedTitle} [${formattedTime}].png`;
+
+    // Create a canvas and capture the current video frame
+    const canvas = document.createElement('canvas');
+    canvas.width = ytvideo.videoWidth;
+    canvas.height = ytvideo.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(ytvideo, 0, 0, canvas.width, canvas.height);
+
+    // Convert canvas to image and trigger download
+    const dataURL = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = dataURL;
+    link.download = filename;  // Use generated filename
+    link.click();
 }
 
 // Function to fetch the video title from the <title> tag

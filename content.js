@@ -32,13 +32,13 @@ function injectButton(controls) {
     snapshotButton.title = 'Take Snapshot';
 
     // Style the button to ensure proper dimensions and visibility
-    snapshotButton.style.width = '48px';   // Adjust button size
-    snapshotButton.style.height = '48px';
+    snapshotButton.style.width = 'auto';   // Adjust button size
+    snapshotButton.style.height = '100%';
     snapshotButton.style.border = 'none';  // Remove default border
     snapshotButton.style.background = 'transparent';  // Transparent background
     snapshotButton.style.cursor = 'pointer';  // Pointer cursor for interactivity
-    snapshotButton.style.paddingLeft = '8px';
-    snapshotButton.style.margin = '0';     // Ensure no margin
+    snapshotButton.style.padding = '0';
+    snapshotButton.style.marginRight = '16px';     // Ensure no margin
     snapshotButton.onmouseover = () => snapshotButton.style.opacity = 0.8;
     snapshotButton.onmouseout = () => snapshotButton.style.opacity = 1;
 
@@ -61,7 +61,7 @@ function injectButton(controls) {
 
 // Add keyboard shortcut functionality
 function addKeyboardShortcut() {
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener('keypress', (event) => {
         // Check if the 's' key is pressed (case insensitive)
         if (event.key.toLowerCase() === 's') {
             takeSnapshot();

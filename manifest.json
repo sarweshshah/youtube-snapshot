@@ -3,10 +3,6 @@
     "name": "YouTube Snapshot",
     "version": "1.0",
     "description": "Take snapshots of YouTube videos and save them locally.",
-    "permissions": [
-        "activeTab",
-        "scripting"
-    ],
     "background": {
         "service_worker": "background.js"
     },
@@ -28,7 +24,7 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "icons/snapshot-icon_1.png"
+                "icons/snapshot-icon.png"
             ],
             "matches": [
                 "https://www.youtube.com/*"

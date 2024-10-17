@@ -95,12 +95,36 @@ function takeSnapshot() {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(ytvideo, 0, 0, canvas.width, canvas.height);
 
-    // Convert canvas to image and trigger download
+    // Convert canvas to image
     const dataURL = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.href = dataURL;
-    link.download = filename;  // Use generated filename
-    link.click();
+
+    // Check if the user wants to save the image as a file or to the clipboard
+    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard'], (data) => {
+        if (data.saveAsFile) {
+            // Save the image as a file
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = filename;  // Use generated filename
+            link.click();
+        }
+
+        if (data.saveToClipboard) {
+            // Save the image to the clipboard
+            saveImageToClipboard(canvas);
+        }
+    });
+}
+
+// Function to save image to the clipboard
+async function saveImageToClipboard(canvas) {
+    try {
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve));
+        const item = new ClipboardItem({ "image/png": blob });
+        await navigator.clipboard.write([item]);
+        alert("Snapshot copied to clipboard!");
+    } catch (err) {
+        console.error("Failed to copy image to clipboard: ", err);
+    }
 }
 
 // Function to fetch the video title from the <title> tag

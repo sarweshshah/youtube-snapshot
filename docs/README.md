@@ -16,7 +16,8 @@ The Extension does **not** collect, store, or transmit any personal information 
 
 **Permissions**\
 The Extension requests the following permissions:
-- **Host permissions for youtube.com**: This permission allows the Extension to interact with the YouTube video player and enable the snapshot functionality.
+- **Storage**: This permission allows the extension to store user preferences for keyboard shortcuts and how snapshots are saved (to file or clipboard).
+- **Host permissions for youtube.com**: This permission allows the extension to interact with the YouTube video player and enable the snapshot functionality.
 
 **How We Use Information**\
 The Extension uses the granted permissions solely to enable its core functionality: capturing a snapshot of the current YouTube video frame and saving it as an image file on your local device. No data is transmitted or stored outside of your browser.

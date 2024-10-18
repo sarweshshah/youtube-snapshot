@@ -1,9 +1,24 @@
 // Wait for the page to completely load before injecting the button
 window.onload = function () {
+    // Load user settings or apply defaults
+    loadUserSettings();
     waitForControlsAndInject();
     // Add keyboard shortcut listener
     addKeyboardShortcut();
 };
+
+// Load user settings or apply default settings
+function loadUserSettings() {
+    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard'], (data) => {
+        // Apply default settings if none are found
+        if (data.saveAsFile === undefined) {
+            chrome.storage.sync.set({ saveAsFile: true });  // Default: Save as File is enabled
+        }
+        if (data.saveToClipboard === undefined) {
+            chrome.storage.sync.set({ saveToClipboard: false });  // Default: Save to Clipboard is disabled
+        }
+    });
+}
 
 function waitForControlsAndInject() {
     const controls = document.querySelector('.ytp-right-controls');
@@ -82,7 +97,6 @@ function takeSnapshot() {
     const formattedTime = formatTime(currentTime);
 
     // Sanitize the video title to make it filename-friendly
-    // const sanitizedTitle = videoTitle.replace(/[^\w\s]/gi, '').replace(/\s+/g, ' ');
     const sanitizedTitle = videoTitle.trim();
 
     // Generate a dynamic filename

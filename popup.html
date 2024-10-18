@@ -8,58 +8,107 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            /* Using the default font */
             margin: 0;
-            padding: 20px;
-            width: 200px;
+            padding: 12px 20px 16px 20px;
+            width: 270px;
             background-color: #f9f9f9;
+            color: #333;
         }
 
         h1 {
             font-size: 16px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             text-align: left;
-            color: #333;
+            color: #5e5e5e;
+            font-weight: 600;
+        }
+
+        .section {
+            margin-bottom: 12px;
+            background-color: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            /* Added box shadow for demarcation */
+        }
+
+        .section-title {
+            font-size: 10px;
+            margin-bottom: 16px;
+            color: #787878;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .setting {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #ffffff;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0;
         }
 
         .setting label {
             font-size: 14px;
-            color: #555;
+            color: #333;
         }
 
         .setting input[type="checkbox"] {
             transform: scale(1.2);
         }
 
+        .setting input[type="text"] {
+            width: 30px;
+            height: 20px;
+            text-align: center;
+            font-size: 14px;
+            padding: 3px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            transition: border-color 0.2s ease-in-out;
+        }
+
+        .setting input[type="text"]:focus {
+            border-color: #007BFF;
+            outline: none;
+        }
+
         footer {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             color: #888;
-            margin-top: 10px;
+            margin-top: 24px;
+            border-radius: 18px;
         }
     </style>
 </head>
 
 <body>
-    <h1>Snapshot Settings</h1>
-    <div class="setting">
-        <label for="fileOption">Save as File</label>
-        <input type="checkbox" id="fileOption" checked /> <!-- File option on by default -->
+    <h1>YouTube Snapshot Settings</h1>
+
+    <!-- Grouped Save Options -->
+    <div class="section">
+        <div class="section-title">Save Options</div>
+        <div class="setting" id="fileOption" style="margin-bottom: 8px;">
+            <label for="fileOption">Save as File</label>
+            <input type="checkbox" id="fileOption" checked />
+        </div>
+        <div class="setting" id="clipboardOption">
+            <label for="clipboardOption">Save to Clipboard</label>
+            <input type="checkbox" id="clipboardOption" />
+        </div>
     </div>
-    <div class="setting">
-        <label for="clipboardOption">Save to Clipboard</label>
-        <input type="checkbox" id="clipboardOption" /> <!-- Clipboard option off by default -->
+
+    <!-- Grouped Shortcut Key Option -->
+    <div class="section">
+        <div class="section-title">Shortcut Key</div>
+        <div class="setting">
+            <label for="shortcutInput">Save on Keypress</label>
+            <input type="text" id="shortcutInput" maxlength="1" value="s" />
+        </div>
     </div>
+
     <footer>
         YouTube Snapshot Extension v1.1
     </footer>

@@ -1,15 +1,19 @@
+let currentShortcutKey = 's'; // Default shortcut key
+
 // Wait for the page to completely load before injecting the button
 window.onload = function () {
     // Load user settings or apply defaults
     loadUserSettings();
     waitForControlsAndInject();
-    // Add keyboard shortcut listener
+    // Add initial keyboard shortcut listener
     addKeyboardShortcut();
+    // Listen for changes in the shortcut key
+    listenForShortcutChanges();
 };
 
 // Load user settings or apply default settings
 function loadUserSettings() {
-    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard'], (data) => {
+    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'shortcutKey'], (data) => {
         // Apply default settings if none are found
         if (data.saveAsFile === undefined) {
             chrome.storage.sync.set({ saveAsFile: true });  // Default: Save as File is enabled
@@ -17,6 +21,8 @@ function loadUserSettings() {
         if (data.saveToClipboard === undefined) {
             chrome.storage.sync.set({ saveToClipboard: false });  // Default: Save to Clipboard is disabled
         }
+        // Set the shortcut key (default to 's')
+        currentShortcutKey = data.shortcutKey || 's';
     });
 }
 
@@ -74,17 +80,29 @@ function injectButton(controls) {
     snapshotButton.addEventListener('click', takeSnapshot);
 }
 
-// Add keyboard shortcut functionality
+// Add initial keyboard shortcut listener
 function addKeyboardShortcut() {
-    document.addEventListener('keypress', (event) => {
-        // Check if the 's' key is pressed (case insensitive)
-        if (event.key.toLowerCase() === 's') {
-            takeSnapshot();
+    document.addEventListener('keypress', handleKeyPress);
+}
+
+// Handle keypress events based on the configured shortcut
+function handleKeyPress(event) {
+    if (event.key.toLowerCase() === currentShortcutKey) {
+        takeSnapshot();
+    }
+}
+
+// Listen for changes to the shortcut key in chrome.storage
+function listenForShortcutChanges() {
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'sync' && changes.shortcutKey) {
+            // Update the current shortcut key
+            currentShortcutKey = changes.shortcutKey.newValue || 's'; // Default to 's'
         }
     });
 }
 
-// Function to capture the snapshot (shared by both button click and 's' key press)
+// Function to capture the snapshot (shared by both button click and keyboard shortcut)
 function takeSnapshot() {
     const ytvideo = document.querySelector('video');
     if (!ytvideo) return;

@@ -1,14 +1,17 @@
 # Youtube Snapshot
+
 Capture and Save YouTube Moments with Ease
 
 This simple and lightweight extension adds a "Snapshot" button to the YouTube video player, allowing you to quickly capture and save any frame of a video as a PNG image. Perfect for grabbing those meme-worthy moments, saving reference images, or creating thumbnails for your own videos.
 
 ## Key Features:
+
 - **One-Click Snapshots**: Easily capture screenshots with a single click.
 - **Local Saving**: Downloaded images are saved directly to your device.
 - **No Fuss**: No complex settings or configurations, just pure snapshotting power.
 
 ## Privacy Policy
+
 This Privacy Policy describes how the YouTube Snapshot Chrome extension ("the Extension") handles your information.
 
 **Information We Collect**\
@@ -16,6 +19,7 @@ The Extension does **not** collect, store, or transmit any personal information 
 
 **Permissions**\
 The Extension requests the following permissions:
+
 - **Storage**: This permission allows the extension to store user preferences for keyboard shortcuts and how snapshots are saved (to file or clipboard).
 - **Host permissions for youtube.com**: This permission allows the extension to interact with the YouTube video player and enable the snapshot functionality.
 
@@ -35,3 +39,5 @@ This Privacy Policy may be updated from time to time. Any updates will be posted
 If you have any questions or concerns about this Privacy Policy, please contact us through the Chrome Web Store.
 
 **Effective Date:** October 12, 2024
+
+[![Download YouTube snapshot Chrome Extension](banner.png)](https://chromewebstore.google.com/detail/youtube-snapshot/cpecoochkebbnkkonbjikioehccfclfa)

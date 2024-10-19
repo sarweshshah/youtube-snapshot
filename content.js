@@ -1,14 +1,12 @@
 let currentShortcutKey = 's'; // Default shortcut key
 
-// Wait for the page to completely load before injecting the button
+// Load user settings, observe the page, and inject button
 window.onload = function () {
-    // Load user settings or apply defaults
-    loadUserSettings();
-    waitForControlsAndInject();
-    // Add initial keyboard shortcut listener
-    addKeyboardShortcut();
-    // Listen for changes in the shortcut key
-    listenForShortcutChanges();
+    loadUserSettings();             // Load initial user settings
+    observePage();                  // Start observing for dynamic content changes
+    injectButton();                 // Inject the button initially when the page loads
+    addKeyboardShortcut();          // Set up the keyboard shortcut listener
+    listenForShortcutChanges();     // Listen for changes to the shortcut key
 };
 
 // Load user settings or apply default settings
@@ -26,26 +24,27 @@ function loadUserSettings() {
     });
 }
 
-function waitForControlsAndInject() {
-    const controls = document.querySelector('.ytp-right-controls');
-
-    // If controls are not found, keep checking every 500ms
-    if (!controls) {
-        const intervalId = setInterval(() => {
-            const controls = document.querySelector('.ytp-right-controls');
-            if (controls) {
-                clearInterval(intervalId);  // Stop checking once controls are found
-                injectButton(controls);
+// Watch for DOM changes (for YouTube's dynamic content)
+const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+        if (mutation.type === 'childList' || mutation.type === 'attributes') {
+            if (document.querySelector('.ytp-right-controls')) {
+                injectButton(); // Ensure the button is always injected
             }
-        }, 500);  // Retry every 500ms
-    } else {
-        // If controls are already available, inject the button immediately
-        injectButton(controls);
+        }
     }
+});
+
+// Start observing the YouTube page for changes
+function observePage() {
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
 }
 
-function injectButton(controls) {
-    if (document.getElementById('snapshotButton')) return;  // Avoid duplicate buttons
+// Inject the snapshot button into YouTube player controls
+function injectButton() {
+    const controls = document.querySelector('.ytp-right-controls');
+
+    if (!controls || document.getElementById('snapshotButton')) return; // Avoid duplicate buttons
 
     // Create the snapshot button
     const snapshotButton = document.createElement('button');
@@ -59,7 +58,7 @@ function injectButton(controls) {
     snapshotButton.style.background = 'transparent';  // Transparent background
     snapshotButton.style.cursor = 'pointer';  // Pointer cursor for interactivity
     snapshotButton.style.padding = '0';
-    snapshotButton.style.marginRight = '16px';  // Ensure no margin
+    snapshotButton.style.marginRight = '16px';
     snapshotButton.onmouseover = () => snapshotButton.style.opacity = 0.8;
     snapshotButton.onmouseout = () => snapshotButton.style.opacity = 1;
 

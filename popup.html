@@ -88,28 +88,28 @@
 <body>
     <h1>Snapshot Settings</h1>
 
-    <!-- Grouped Save Options -->
+    <!-- Grouped File Options -->
     <div class="section">
-        <div class="section-title">Save Options</div>
-        <div class="setting" id="fileOption_div" style="margin-bottom: 8px;">
+        <div class="section-title">File Options</div>
+        <div class="setting" id="fileOption_div"">
             <label for="fileOption">Save as File</label>
             <input type="checkbox" id="fileOption" checked />
         </div>
-        <div class="setting" id="clipboardOption_div">
-            <label for="clipboardOption">Save to Clipboard</label>
-            <input type="checkbox" id="clipboardOption" />
-        </div>
-    </div>
-
-    <!-- Grouped Save Options -->
-    <div class="section">
-        <div class="section-title">File Options</div>
-        <div class="setting" id="formatOption_div">
+        <div class="setting" id="formatSetting" style="display: none;">
             <label for="formatOption">File Format</label>
             <select id="formatOption">
                 <option value="png">PNG</option>
                 <option value="jpg">JPG</option>
             </select>
+        </div>
+    </div>
+
+    <!-- Grouped Clipboard Options -->
+    <div class="section">
+        <div class="section-title">Clipboard Options</div>
+        <div class="setting">
+            <label for="clipboardOption">Save to Clipboard</label>
+            <input type="checkbox" id="clipboardOption" />
         </div>
     </div>
 

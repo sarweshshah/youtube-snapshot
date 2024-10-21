@@ -19,8 +19,7 @@ function loadUserSettings() {
         if (data.saveToClipboard === undefined) {
             chrome.storage.sync.set({ saveToClipboard: false });  // Default: Save to Clipboard is disabled
         }
-        // Set the shortcut key (default to 's')
-        currentShortcutKey = data.shortcutKey || 's';
+        currentShortcutKey = data.shortcutKey || currentShortcutKey;
     });
 }
 
@@ -96,7 +95,7 @@ function listenForShortcutChanges() {
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'sync' && changes.shortcutKey) {
             // Update the current shortcut key
-            currentShortcutKey = changes.shortcutKey.newValue || 's'; // Default to 's'
+            currentShortcutKey = changes.shortcutKey.newValue || currentShortcutKey;
         }
     });
 }
@@ -116,33 +115,40 @@ function takeSnapshot() {
     // Sanitize the video title to make it filename-friendly
     const sanitizedTitle = videoTitle.trim();
 
-    // Generate a dynamic filename
-    const filename = `${sanitizedTitle} [${formattedTime}].png`;
+    // Load the user's preferred file format
+    chrome.storage.sync.get(['fileFormat'], (data) => {
+        const format = data.fileFormat || 'png'; // Default to PNG if not set
+        const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
+        const extension = format === 'jpg' ? 'jpg' : 'png';
 
-    // Create a canvas and capture the current video frame
-    const canvas = document.createElement('canvas');
-    canvas.width = ytvideo.videoWidth;
-    canvas.height = ytvideo.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(ytvideo, 0, 0, canvas.width, canvas.height);
+        // Generate a dynamic filename with the chosen extension
+        const filename = `${sanitizedTitle} [${formattedTime}].${extension}`;
 
-    // Convert canvas to image
-    const dataURL = canvas.toDataURL('image/png');
+        // Create a canvas and capture the current video frame
+        const canvas = document.createElement('canvas');
+        canvas.width = ytvideo.videoWidth;
+        canvas.height = ytvideo.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(ytvideo, 0, 0, canvas.width, canvas.height);
 
-    // Check if the user wants to save the image as a file or to the clipboard
-    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard'], (data) => {
-        if (data.saveAsFile) {
-            // Save the image as a file
-            const link = document.createElement('a');
-            link.href = dataURL;
-            link.download = filename;  // Use generated filename
-            link.click();
-        }
+        // Convert canvas to image in the selected format
+        const dataURL = canvas.toDataURL(mimeType);
 
-        if (data.saveToClipboard) {
-            // Save the image to the clipboard
-            saveImageToClipboard(canvas);
-        }
+        // Check if the user wants to save the image as a file or to the clipboard
+        chrome.storage.sync.get(['saveAsFile', 'saveToClipboard'], (data) => {
+            if (data.saveAsFile) {
+                // Save the image as a file
+                const link = document.createElement('a');
+                link.href = dataURL;
+                link.download = filename;  // Use generated filename with the correct extension
+                link.click();
+            }
+
+            if (data.saveToClipboard) {
+                // Save the image to the clipboard
+                saveImageToClipboard(canvas);
+            }
+        });
     });
 }
 

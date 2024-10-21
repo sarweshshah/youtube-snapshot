@@ -86,7 +86,7 @@
 </head>
 
 <body>
-    <h1>YouTube Snapshot Settings</h1>
+    <h1>Snapshot Settings</h1>
 
     <!-- Grouped Save Options -->
     <div class="section">
@@ -101,9 +101,21 @@
         </div>
     </div>
 
+    <!-- Grouped Save Options -->
+    <div class="section">
+        <div class="section-title">File Options</div>
+        <div class="setting" id="formatOption_div">
+            <label for="formatOption">File Format</label>
+            <select id="formatOption">
+                <option value="png">PNG</option>
+                <option value="jpg">JPG</option>
+            </select>
+        </div>
+    </div>
+
     <!-- Grouped Shortcut Key Option -->
     <div class="section">
-        <div class="section-title">Shortcut Key</div>
+        <div class="section-title" style="margin-bottom: 8px;">Shortcut Key</div>
         <div class="setting">
             <label for="shortcutInput">Save on Keypress</label>
             <input type="text" id="shortcutInput" maxlength="1" value="s" />

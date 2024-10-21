@@ -11,7 +11,7 @@ window.onload = function () {
 
 // Load user settings or apply default settings
 function loadUserSettings() {
-    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'shortcutKey'], (data) => {
+    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'shortcutKey', 'fileFormat'], (data) => {
         // Apply default settings if none are found
         if (data.saveAsFile === undefined) {
             chrome.storage.sync.set({ saveAsFile: true });  // Default: Save as File is enabled
@@ -20,6 +20,8 @@ function loadUserSettings() {
             chrome.storage.sync.set({ saveToClipboard: false });  // Default: Save to Clipboard is disabled
         }
         currentShortcutKey = data.shortcutKey || currentShortcutKey;
+        // Default file format is PNG
+        chrome.storage.sync.set({ fileFormat: data.fileFormat || 'png' });
     });
 }
 

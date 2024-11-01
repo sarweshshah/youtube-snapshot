@@ -21,7 +21,9 @@ The Extension does **not** collect, store, or transmit any personal information 
 The Extension requests the following permissions:
 
 - **Storage**: This permission allows the extension to store user preferences for keyboard shortcuts and how snapshots are saved (to file or clipboard).
-- **Host permissions for youtube.com**: This permission allows the extension to interact with the YouTube video player and enable the snapshot functionality.
+- **WebNavigation**: Since embedded iframes do not trigger the usual page load events that a standard content script relies on, webNavigation is necessary to identify and access these embedded videos dynamically.
+- **Scripting**: This is essential for interacting with the YouTube video controls inside the iframe and injecting the snapshot button. Without scripting, the extension would be unable to dynamically inject content.js into iframes.
+- **Host permissions**: This permission allows the extension to interact with the YouTube video player from any website and enable the snapshot functionality.
 
 **How We Use Information**\
 The Extension uses the granted permissions solely to enable its core functionality: capturing a snapshot of the current YouTube video frame and saving it as an image file on your local device. No data is transmitted or stored outside of your browser.

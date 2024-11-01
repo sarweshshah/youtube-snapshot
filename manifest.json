@@ -2,9 +2,14 @@
     "manifest_version": 3,
     "name": "YouTube Snapshot",
     "version": "1.1",
-    "description": "Take YouTube video snapshots and save to clipboard or file.",
+    "description": "Take snapshots of YouTube videos and save to clipboard or file.",
     "permissions": [
-        "storage"
+        "storage",
+        "webNavigation",
+        "scripting"
+    ],
+    "host_permissions": [
+        "<all_urls>"
     ],
     "background": {
         "service_worker": "background.js"
@@ -15,7 +20,8 @@
     "content_scripts": [
         {
             "matches": [
-                "https://www.youtube.com/*"
+                "*://*.youtube.com/*",
+                "*://*.youtube-nocookie.com/*"
             ],
             "js": [
                 "content.js"
@@ -34,7 +40,7 @@
                 "icons/snapshot-icon.png"
             ],
             "matches": [
-                "https://www.youtube.com/*"
+                "<all_urls>"
             ]
         }
     ]

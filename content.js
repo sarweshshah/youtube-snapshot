@@ -1,5 +1,8 @@
 let currentShortcutKey = 's'; // Default shortcut key
 
+// Inject the snapshot button immediately when the script loads
+injectButton();
+
 // Load user settings, observe the page, and inject button
 window.onload = function () {
     loadUserSettings();             // Load initial user settings
@@ -30,7 +33,7 @@ const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
         if (mutation.type === 'childList' || mutation.type === 'attributes') {
             if (document.querySelector('.ytp-right-controls')) {
-                injectButton(); // Ensure the button is always injected
+                injectButton(); // Re-inject the button if controls change
             }
         }
     }
@@ -51,7 +54,7 @@ function injectButton() {
     const snapshotButton = document.createElement('button');
     snapshotButton.id = 'snapshotButton';
     snapshotButton.title = 'Take Snapshot';
-
+    
     // Style the button to ensure proper dimensions and visibility
     snapshotButton.style.width = 'auto';   // Adjust button size
     snapshotButton.style.height = '100%';

@@ -7,8 +7,13 @@ This simple and lightweight extension adds a "Snapshot" button to the YouTube vi
 ## Key Features
 
 - **One-Click Snapshots**: Easily capture screenshots with a single click.
-- **Local Saving**: Downloaded images are saved directly to your device.
-- **No Fuss**: No complex settings or configurations, just pure snapshotting power.
+- **Save to Your Computer**: Download those snazzy screenshots as PNGs or JPGs.
+- **Copy to Clipboard**: Paste those pics anywhere you want!
+- **Keyboard Shortcuts**: Set up your own shortcut for lightning-fast captures.
+- **Smart File Names**: No more guessing games! Your screenshots will have the video title and timestamp.
+- **Simple Setup:** Get snapping in seconds!
+- **Support for Embedded videos**: Works for both Youtube website and embedded videos
+
 
 ## Privacy Policy
 

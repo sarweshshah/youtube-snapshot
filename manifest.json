@@ -37,7 +37,8 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "icons/snapshot-icon.png"
+                "icons/snapshot-icon.png",
+                "audio/download-sound.mp3"
             ],
             "matches": [
                 "<all_urls>"

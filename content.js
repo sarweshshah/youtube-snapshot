@@ -153,6 +153,10 @@ function takeSnapshot() {
                 // Save the image to the clipboard
                 saveImageToClipboard(canvas);
             }
+
+            // Play download sound
+            const audio = new Audio(chrome.runtime.getURL('audio/download-sound.mp3'));
+            audio.play().catch(error => console.error("Error playing sound:", error));
         });
     });
 }

@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formatOption = document.getElementById('formatOption');
     const formatSetting = document.getElementById('formatSetting');
     const versionElement = document.getElementById('version');
+    const soundOption = document.getElementById('soundOption');
 
     // Show or hide format option based on "Save as File" checkbox state
     const toggleFormatOption = () => {
@@ -13,11 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Load saved preferences from chrome.storage
-    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'shortcutKey', 'fileFormat'], (data) => {
+    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'shortcutKey', 'fileFormat', 'playSound'], (data) => {
         fileOption.checked = data.saveAsFile !== undefined ? data.saveAsFile : true; // Default to true
         clipboardOption.checked = data.saveToClipboard || false; // Default to false
         shortcutInput.value = data.shortcutKey || 's'; // Default shortcut is 's'
         formatOption.value = data.fileFormat || 'png'; // Default format is PNG
+        soundOption.checked = data.playSound !== false; // Default to true
 
         toggleFormatOption(); // Ensure proper visibility based on saved state
     });
@@ -45,6 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     formatOption.addEventListener('change', () => {
         chrome.storage.sync.set({ fileFormat: formatOption.value });
+    });
+
+    soundOption.addEventListener('change', () => {
+        chrome.storage.sync.set({ playSound: soundOption.checked });
     });
 
     // Get the version from manifest.json and display it in the popup

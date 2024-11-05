@@ -154,9 +154,13 @@ function takeSnapshot() {
                 saveImageToClipboard(canvas);
             }
 
-            // Play download sound
-            const audio = new Audio(chrome.runtime.getURL('audio/download-sound.mp3'));
-            audio.play().catch(error => console.error("Error playing sound:", error));
+            // Check if the sound option is enabled and play the sound
+            chrome.storage.sync.get(['playSound'], (data) => {
+                if (data.playSound !== false) { // Default to true
+                    const audio = new Audio(chrome.runtime.getURL('audio/download-sound.mp3'));
+                    audio.play().catch(error => console.error("Error playing sound:", error));
+                }
+            });
         });
     });
 }

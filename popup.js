@@ -13,16 +13,25 @@ document.addEventListener('DOMContentLoaded', () => {
         formatSetting.style.marginTop = fileOption.checked ? '8px' : '0px'; // Adjust margin-top
     };
 
-    // Load saved preferences from chrome.storage
-    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'shortcutKey', 'fileFormat', 'playSound'], (data) => {
-        fileOption.checked = data.saveAsFile !== undefined ? data.saveAsFile : true; // Default to true
-        clipboardOption.checked = data.saveToClipboard || false; // Default to false
-        shortcutInput.value = data.shortcutKey || 's'; // Default shortcut is 's'
-        formatOption.value = data.fileFormat || 'png'; // Default format is PNG
-        soundOption.checked = data.playSound !== false; // Default to true
-
-        toggleFormatOption(); // Ensure proper visibility based on saved state
-    });
+    // Load saved preferences from chrome.storage, with error handling
+    try {
+        chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'shortcutKey', 'fileFormat', 'playSound'], (data) => {
+            if (chrome.runtime.lastError) {
+                console.error("Error accessing chrome.storage:", chrome.runtime.lastError);
+                return;
+            }
+            
+            fileOption.checked = data.saveAsFile !== undefined ? data.saveAsFile : true; // Default to true
+            clipboardOption.checked = data.saveToClipboard || false; // Default to false
+            shortcutInput.value = data.shortcutKey || 's'; // Default shortcut is 's'
+            formatOption.value = data.fileFormat || 'png'; // Default format is PNG
+            soundOption.checked = data.playSound !== false; // Default to true
+    
+            toggleFormatOption(); // Ensure proper visibility based on saved state
+        });
+    } catch (error) {
+        console.error("Error with chrome.storage access:", error);
+    }
 
     // Save preferences when checkboxes or dropdowns are changed
     fileOption.addEventListener('change', () => {

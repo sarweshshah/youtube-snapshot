@@ -14,7 +14,7 @@ window.onload = function () {
 
 // Load user settings or apply default settings
 function loadUserSettings() {
-    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'shortcutKey', 'fileFormat'], (data) => {
+    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'shortcutKey', 'fileFormat', 'playSound'], (data) => {
         // Apply default settings if none are found
         if (data.saveAsFile === undefined) {
             chrome.storage.sync.set({ saveAsFile: true });  // Default: Save as File is enabled
@@ -171,7 +171,25 @@ async function saveImageToClipboard(canvas) {
         const blob = await new Promise((resolve) => canvas.toBlob(resolve));
         const item = new ClipboardItem({ "image/png": blob });
         await navigator.clipboard.write([item]);
-        alert("Snapshot copied to clipboard!");
+        // alert("Snapshot copied to clipboard!");
+
+        // Create a temporary alert message
+        const alertBox = document.createElement('div');
+        alertBox.textContent = "Snapshot copied to clipboard!";
+        alertBox.style.fontSize = "14px"
+        alertBox.style.position = 'fixed';
+        alertBox.style.bottom = '20px';
+        alertBox.style.right = '20px';
+        alertBox.style.backgroundColor = '#333';
+        alertBox.style.color = '#fff';
+        alertBox.style.padding = '12px 24px';
+        alertBox.style.borderRadius = '8px';
+        alertBox.style.zIndex = '1000';
+        document.body.appendChild(alertBox);
+
+        // Remove the alert message after 3 seconds
+        setTimeout(() => { alertBox.remove(); }, 3000);
+        
     } catch (err) {
         console.error("Failed to copy image to clipboard: ", err);
     }

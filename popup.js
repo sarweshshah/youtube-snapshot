@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const fileOption = document.getElementById('fileOption');
     const clipboardOption = document.getElementById('clipboardOption');
+    const keypressOption = document.getElementById('keypressOption');
     const shortcutInput = document.getElementById('shortcutInput');
     const formatOption = document.getElementById('formatOption');
     const formatSetting = document.getElementById('formatSetting');
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load saved preferences from chrome.storage, with error handling
     try {
-        chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'shortcutKey', 'fileFormat', 'playSound'], (data) => {
+        chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'enableKeypress', 'shortcutKey', 'fileFormat', 'playSound'], (data) => {
             if (chrome.runtime.lastError) {
                 console.error("Error accessing chrome.storage:", chrome.runtime.lastError);
                 return;
@@ -23,9 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             fileOption.checked = data.saveAsFile !== undefined ? data.saveAsFile : true; // Default to true
             clipboardOption.checked = data.saveToClipboard || false; // Default to false
-            shortcutInput.value = data.shortcutKey || 's'; // Default shortcut is 's'
             formatOption.value = data.fileFormat || 'png'; // Default format is PNG
             soundOption.checked = data.playSound !== false; // Default to true
+
+            // Set the checkbox and shortcut key based on saved preferences
+            keypressOption.checked = data.enableKeypress || false;
+            shortcutContainer.style.display = keypressOption.checked ? 'flex' : 'none';
+            shortcutInput.value = data.shortcutKey || 's';
     
             toggleFormatOption(); // Ensure proper visibility based on saved state
         });
@@ -47,10 +52,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Save keypress option and toggle shortcut input
+    keypressOption.addEventListener('change', () => {
+        const isEnabled = keypressOption.checked;
+        chrome.storage.sync.set({ enableKeypress: isEnabled });
+        shortcutContainer.style.display = isEnabled ? 'flex' : 'none';
+    });
+
+    // Save shortcut key when input is changed
     shortcutInput.addEventListener('input', () => {
         const newShortcut = shortcutInput.value.trim().toLowerCase();
-        if (newShortcut.length === 1) {
+        if (/^[a-z]$/.test(newShortcut)) { // Allow only single letters
             chrome.storage.sync.set({ shortcutKey: newShortcut });
+        } else {
+            shortcutInput.value = ""; // Clear invalid input
         }
     });
 

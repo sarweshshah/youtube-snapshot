@@ -120,9 +120,8 @@ function takeSnapshot() {
     // Sanitize the video title to make it filename-friendly
     const sanitizedTitle = videoTitle.trim();
 
-    // Load the user's preferred file format
-    chrome.storage.sync.get(['fileFormat'], (data) => {
-        const format = data.fileFormat || 'png'; // Default to PNG if not set
+    chrome.storage.sync.get(['fileFormat', 'saveAsFile', 'saveToClipboard'], (data) => {
+        const format = data.fileFormat || 'png';
         const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
         const extension = format === 'jpg' ? 'jpg' : 'png';
 

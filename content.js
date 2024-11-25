@@ -8,13 +8,12 @@ window.onload = function () {
     loadUserSettings();             // Load initial user settings
     observePage();                  // Start observing for dynamic content changes
     injectButton();                 // Inject the button initially when the page loads
-    addKeyboardShortcut();          // Set up the keyboard shortcut listener
-    listenForShortcutChanges();     // Listen for changes to the shortcut key
+    setupKeyboardShortcut();        // Set up dynamic keypress functionality
 };
 
 // Load user settings or apply default settings
 function loadUserSettings() {
-    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'shortcutKey', 'fileFormat', 'playSound'], (data) => {
+    chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'enableKeypress', 'shortcutKey', 'fileFormat', 'playSound'], (data) => {
         // Apply default settings if none are found
         if (data.saveAsFile === undefined) {
             chrome.storage.sync.set({ saveAsFile: true });  // Default: Save as File is enabled
@@ -83,24 +82,39 @@ function injectButton() {
     snapshotButton.addEventListener('click', takeSnapshot);
 }
 
-// Add initial keyboard shortcut listener
-function addKeyboardShortcut() {
-    document.addEventListener('keypress', handleKeyPress);
-}
+// Dynamically handle keypress shortcut functionality
+function setupKeyboardShortcut() {
+    let keypressListener;
 
-// Handle keypress events based on the configured shortcut
-function handleKeyPress(event) {
-    if (event.key.toLowerCase() === currentShortcutKey) {
-        takeSnapshot();
-    }
-}
+    const updateKeypressListener = () => {
+        // Remove the old listener
+        if (keypressListener) {
+            document.removeEventListener('keypress', keypressListener);
+        }
 
-// Listen for changes to the shortcut key in chrome.storage
-function listenForShortcutChanges() {
+        // Check for the current keypress setting
+        chrome.storage.sync.get(['enableKeypress', 'shortcutKey'], (data) => {
+            const isEnabled = data.enableKeypress || false;
+            const shortcutKey = data.shortcutKey || 's';
+
+            if (isEnabled) {
+                keypressListener = (event) => {
+                    if (event.key.toLowerCase() === shortcutKey) {
+                        takeSnapshot();
+                    }
+                };
+                document.addEventListener('keypress', keypressListener);
+            }
+        });
+    };
+
+    // Initial setup
+    updateKeypressListener();
+
+    // Listen for changes to enableKeypress or shortcutKey
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area === 'sync' && changes.shortcutKey) {
-            // Update the current shortcut key
-            currentShortcutKey = changes.shortcutKey.newValue || currentShortcutKey;
+        if (area === 'sync' && (changes.enableKeypress || changes.shortcutKey)) {
+            updateKeypressListener();
         }
     });
 }
@@ -138,28 +152,26 @@ function takeSnapshot() {
         // Convert canvas to image in the selected format
         const dataURL = canvas.toDataURL(mimeType);
 
-        // Check if the user wants to save the image as a file or to the clipboard
-        chrome.storage.sync.get(['saveAsFile', 'saveToClipboard'], (data) => {
-            if (data.saveAsFile) {
-                // Save the image as a file
-                const link = document.createElement('a');
-                link.href = dataURL;
-                link.download = filename;  // Use generated filename with the correct extension
-                link.click();
-            }
+        // Handle save-to-file and clipboard options
+        if (data.saveAsFile) {
+            // Save the image as a file
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = filename;  // Use generated filename with the correct extension
+            link.click();
+        }
 
-            if (data.saveToClipboard) {
-                // Save the image to the clipboard
-                saveImageToClipboard(canvas);
-            }
+        if (data.saveToClipboard) {
+            // Save the image to the clipboard
+            saveImageToClipboard(canvas);
+        }
 
-            // Check if the sound option is enabled and play the sound
-            chrome.storage.sync.get(['playSound'], (data) => {
-                if (data.playSound !== false) { // Default to true
-                    const audio = new Audio(chrome.runtime.getURL('audio/download-sound.mp3'));
-                    audio.play().catch(error => console.error("Error playing sound:", error));
-                }
-            });
+        // Check if the sound option is enabled and play the sound
+        chrome.storage.sync.get(['playSound'], (data) => {
+            if (data.playSound !== false) { // Default to true
+                const audio = new Audio(chrome.runtime.getURL('audio/download-sound.mp3'));
+                audio.play().catch(error => console.error("Error playing sound:", error));
+            }
         });
     });
 }
@@ -188,7 +200,7 @@ async function saveImageToClipboard(canvas) {
 
         // Remove the alert message after 3 seconds
         setTimeout(() => { alertBox.remove(); }, 3000);
-        
+
     } catch (err) {
         console.error("Failed to copy image to clipboard: ", err);
     }

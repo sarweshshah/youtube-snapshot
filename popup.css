@@ -62,6 +62,15 @@ h1 {
     transition: border-color 0.2s ease-in-out;
 }
 
+/* When input is disabled */
+.setting input[type="text"]:disabled {
+    background-color: #f0f0f0;
+    color: #aaa;
+    border-color: #ccc;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .setting input[type="text"]:focus {
     border-color: #007BFF;
     outline: none;

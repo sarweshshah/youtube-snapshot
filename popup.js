@@ -14,24 +14,28 @@ document.addEventListener('DOMContentLoaded', () => {
         formatSetting.style.marginTop = fileOption.checked ? '8px' : '0px'; // Adjust margin-top
     };
 
-    // Load saved preferences from chrome.storage, with error handling
+    // Load saved preferences
     try {
-        chrome.storage.sync.get(['saveAsFile', 'saveToClipboard', 'enableKeypress', 'shortcutKey', 'fileFormat', 'playSound'], (data) => {
+        chrome.storage.sync.get([
+            'saveAsFile', 'saveToClipboard', 'enableKeypress',
+            'shortcutKey', 'fileFormat', 'playSound'
+        ], (data) => {
             if (chrome.runtime.lastError) {
                 console.error("Error accessing chrome.storage:", chrome.runtime.lastError);
                 return;
             }
-            
-            fileOption.checked = data.saveAsFile !== undefined ? data.saveAsFile : true; // Default to true
-            clipboardOption.checked = data.saveToClipboard || false; // Default to false
-            formatOption.value = data.fileFormat || 'png'; // Default format is PNG
-            soundOption.checked = data.playSound !== false; // Default to true
+        
+            fileOption.checked = data.saveAsFile ?? true;
+            clipboardOption.checked = data.saveToClipboard ?? false;
+            formatOption.value = data.fileFormat ?? 'png';
+            soundOption.checked = data.playSound ?? true;
+        
+            keypressOption.checked = data.enableKeypress ?? false;
+            shortcutInput.value = data.shortcutKey ?? 's';
 
-            // Set the checkbox and shortcut key based on saved preferences
-            keypressOption.checked = data.enableKeypress || false;
-            shortcutContainer.style.display = keypressOption.checked ? 'flex' : 'none';
-            shortcutInput.value = data.shortcutKey || 's';
-    
+            // Disable input unless checkbox is checked
+            shortcutInput.disabled = !keypressOption.checked;
+
             toggleFormatOption(); // Ensure proper visibility based on saved state
         });
     } catch (error) {
@@ -52,11 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Save keypress option and toggle shortcut input
+    // Save keypress option and disable shortcut input
     keypressOption.addEventListener('change', () => {
         const isEnabled = keypressOption.checked;
         chrome.storage.sync.set({ enableKeypress: isEnabled });
-        shortcutContainer.style.display = isEnabled ? 'flex' : 'none';
+        shortcutInput.disabled = !isEnabled; // Enable/Disable input field
     });
 
     // Save shortcut key when input is changed

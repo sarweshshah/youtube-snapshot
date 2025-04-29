@@ -1,10 +1,12 @@
 let currentShortcutKey = 's'; // Default shortcut key
+let gifRecorder = new GIFRecorder(); // Initialize GIF recorder
 
 // Inject the snapshot button immediately when the script loads
 injectButton();
 
 // Load user settings, observe the page, and inject button
 window.onload = function () {
+    console.log('Window loaded, initializing...');
     loadUserSettings();             // Load initial user settings
     observePage();                  // Start observing for dynamic content changes
     injectButton();                 // Inject the button initially when the page loads
@@ -20,6 +22,9 @@ function loadUserSettings() {
         }
         if (data.saveToClipboard === undefined) {
             chrome.storage.sync.set({ saveToClipboard: false });  // Default: Save to Clipboard is disabled
+        }
+        if (data.enableKeypress === undefined) {
+            chrome.storage.sync.set({ enableKeypress: true });  // Default: Enable keyboard shortcuts
         }
         currentShortcutKey = data.shortcutKey || currentShortcutKey;
         // Default file format is PNG
@@ -94,17 +99,21 @@ function setupKeyboardShortcut() {
 
         // Check for the current keypress setting
         chrome.storage.sync.get(['enableKeypress', 'shortcutKey'], (data) => {
-            const isEnabled = data.enableKeypress || false;
+            // Always enable keyboard shortcuts
+            const isEnabled = true; // Force enable keyboard shortcuts
             const shortcutKey = data.shortcutKey || 's';
 
-            if (isEnabled) {
-                keypressListener = (event) => {
-                    if (event.key.toLowerCase() === shortcutKey) {
-                        takeSnapshot();
-                    }
-                };
-                document.addEventListener('keypress', keypressListener);
-            }
+            keypressListener = (event) => {
+                const ytvideo = document.querySelector('video');
+                if (!ytvideo) return;
+
+                if (event.key.toLowerCase() === shortcutKey) {
+                    takeSnapshot();
+                } else if (event.key.toLowerCase() === 'p') {
+                    handleGifRecording(ytvideo);
+                }
+            };
+            document.addEventListener('keypress', keypressListener);
         });
     };
 
@@ -117,6 +126,38 @@ function setupKeyboardShortcut() {
             updateKeypressListener();
         }
     });
+}
+
+// Handle GIF recording
+function handleGifRecording(video) {
+    if (!gifRecorder.isRecording()) {
+        // Start recording
+        gifRecorder.startRecording(video);
+        showNotification('GIF recording started...', 'info');
+    } else {
+        // Stop recording
+        gifRecorder.stopRecording();
+        showNotification('GIF recording stopped. Processing...', 'info');
+    }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const alertBox = document.createElement('div');
+    alertBox.textContent = message;
+    alertBox.style.fontSize = "14px";
+    alertBox.style.position = 'fixed';
+    alertBox.style.bottom = '20px';
+    alertBox.style.right = '20px';
+    alertBox.style.backgroundColor = type === 'info' ? '#333' : '#ff4444';
+    alertBox.style.color = '#fff';
+    alertBox.style.padding = '12px 24px';
+    alertBox.style.borderRadius = '8px';
+    alertBox.style.zIndex = '1000';
+    document.body.appendChild(alertBox);
+
+    // Remove the alert message after 3 seconds
+    setTimeout(() => { alertBox.remove(); }, 3000);
 }
 
 // Function to capture the snapshot (shared by both button click and keyboard shortcut)

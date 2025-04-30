@@ -51,7 +51,7 @@ h1 {
 }
 
 .setting input[type="text"] {
-    width: 30px;
+    width: 24px;
     height: 20px;
     text-align: center;
     font-size: 14px;
@@ -82,4 +82,23 @@ footer {
     color: #888;
     margin-top: 24px;
     border-radius: 18px;
+}
+
+.info-text {
+    color: #333;
+    font-size: 14px;
+}
+
+kbd {
+    background-color: #f7f7f7;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    color: #333;
+    display: inline-block;
+    font-size: 0.9em;
+    font-weight: 500;
+    line-height: 1.1;
+    padding: 2px 5px;
+    white-space: nowrap;
 }

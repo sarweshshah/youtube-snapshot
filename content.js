@@ -111,9 +111,14 @@ function setupKeyboardShortcut() {
                 const ytvideo = document.querySelector('video');
                 if (!ytvideo) return;
 
-                if (event.key.toLowerCase() === shortcutKey) {
+                const pressedKey = event.key.toLowerCase();
+                
+                // Check snapshot shortcut first
+                if (pressedKey === shortcutKey) {
                     takeSnapshot();
-                } else if (event.key.toLowerCase() === 'g') {
+                } 
+                // Only handle GIF shortcut if it doesn't conflict with snapshot shortcut
+                else if (pressedKey === 'g' && shortcutKey !== 'g') {
                     handleGifRecording(ytvideo);
                 }
             };

@@ -1,5 +1,6 @@
 let currentShortcutKey = 's'; // Default shortcut key
 let gifRecorder = new GIFRecorder(); // Initialize GIF recorder
+let currentNotification = null;
 
 // Inject the snapshot button immediately when the script loads
 injectButton();
@@ -112,7 +113,7 @@ function setupKeyboardShortcut() {
 
                 if (event.key.toLowerCase() === shortcutKey) {
                     takeSnapshot();
-                } else if (event.key.toLowerCase() === 'p') {
+                } else if (event.key.toLowerCase() === 'g') {
                     handleGifRecording(ytvideo);
                 }
             };
@@ -142,18 +143,29 @@ function handleGifRecording(video) {
         
         // Update progress message when GIF is ready
         gifRecorder.gif.on('progress', (p) => {
-            progressBox.textContent = `Processing GIF... ${Math.round(p * 100)}%`;
+            if (currentNotification === progressBox) {
+                progressBox.textContent = `Processing GIF... ${Math.round(p * 100)}%`;
+            }
         });
 
         gifRecorder.gif.on('finished', () => {
-            progressBox.remove();
-            showNotification('GIF saved successfully!', 'info');
+            if (currentNotification === progressBox) {
+                progressBox.remove();
+                currentNotification = null;
+                showNotification('GIF saved successfully!', 'info');
+            }
         });
     }
 }
 
 // Show notification
 function showNotification(message, type = 'info', duration = 3000) {
+    // Remove previous notification if it exists
+    if (currentNotification) {
+        currentNotification.remove();
+        currentNotification = null;
+    }
+
     const alertBox = document.createElement('div');
     alertBox.textContent = message;
     Object.assign(alertBox.style, {
@@ -168,15 +180,17 @@ function showNotification(message, type = 'info', duration = 3000) {
         zIndex: '1000',
         display: 'flex',
         alignItems: 'center',
-        gap: '10px'
+        gap: '10px',
+        opacity: '0',
+        transition: 'opacity 0.3s ease-in-out'
     });
 
     if (type === 'progress') {
         const spinner = document.createElement('div');
         spinner.className = 'spinner';
         Object.assign(spinner.style, {
-            width: '16px',
-            height: '16px',
+            width: '12px',
+            height: '12px',
             border: '2px solid #fff',
             borderTop: '2px solid transparent',
             borderRadius: '50%',
@@ -195,8 +209,25 @@ function showNotification(message, type = 'info', duration = 3000) {
     }
 
     document.body.appendChild(alertBox);
+    
+    // Trigger reflow to enable transition
+    alertBox.offsetHeight;
+    alertBox.style.opacity = '1';
+
+    currentNotification = alertBox;
+
     if (duration > 0) {
-        setTimeout(() => alertBox.remove(), duration);
+        setTimeout(() => {
+            if (currentNotification === alertBox) {
+                alertBox.style.opacity = '0';
+                setTimeout(() => {
+                    if (currentNotification === alertBox) {
+                        alertBox.remove();
+                        currentNotification = null;
+                    }
+                }, 300);
+            }
+        }, duration);
     }
     return alertBox;
 }

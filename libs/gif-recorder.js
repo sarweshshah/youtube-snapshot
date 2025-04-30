@@ -60,7 +60,12 @@ class GIFRecorder {
             const videoTitle = this.getTitleFromHeadTag();
             const formattedTime = this.formatTime(video.currentTime);
             
-            // Render the GIF
+            this.gif.on('progress', (p) => {
+                // Emit progress event
+                const event = new CustomEvent('gifProgress', { detail: p });
+                document.dispatchEvent(event);
+            });
+
             this.gif.on('finished', (blob) => {
                 // Create download link with formatted filename
                 const link = document.createElement('a');
@@ -72,6 +77,10 @@ class GIFRecorder {
                 URL.revokeObjectURL(link.href);
                 this.frames = [];
                 this.gif = null;
+
+                // Emit finished event
+                const event = new CustomEvent('gifFinished');
+                document.dispatchEvent(event);
             });
 
             this.gif.render();

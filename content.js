@@ -134,18 +134,26 @@ function setupKeyboardShortcut() {
 // Handle GIF recording
 function handleGifRecording(video) {
     if (!gifRecorder.isRecording()) {
-        // Start recording
         gifRecorder.startRecording(video);
         showNotification('GIF recording started...', 'info');
     } else {
-        // Stop recording
         gifRecorder.stopRecording();
-        showNotification('GIF recording stopped. Processing...', 'info');
+        const progressBox = showNotification('Processing GIF...', 'progress', 0);
+        
+        // Update progress message when GIF is ready
+        gifRecorder.gif.on('progress', (p) => {
+            progressBox.textContent = `Processing GIF... ${Math.round(p * 100)}%`;
+        });
+
+        gifRecorder.gif.on('finished', () => {
+            progressBox.remove();
+            showNotification('GIF saved successfully!', 'info');
+        });
     }
 }
 
 // Show notification
-function showNotification(message, type = 'info') {
+function showNotification(message, type = 'info', duration = 3000) {
     const alertBox = document.createElement('div');
     alertBox.textContent = message;
     Object.assign(alertBox.style, {
@@ -157,12 +165,40 @@ function showNotification(message, type = 'info') {
         color: '#fff',
         padding: '12px 24px',
         borderRadius: '8px',
-        zIndex: '1000'
+        zIndex: '1000',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px'
     });
-    document.body.appendChild(alertBox);
 
-    // Remove the alert message after 3 seconds
-    setTimeout(() => { alertBox.remove(); }, 3000);
+    if (type === 'progress') {
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner';
+        Object.assign(spinner.style, {
+            width: '16px',
+            height: '16px',
+            border: '2px solid #fff',
+            borderTop: '2px solid transparent',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+        });
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+        alertBox.insertBefore(spinner, alertBox.firstChild);
+    }
+
+    document.body.appendChild(alertBox);
+    if (duration > 0) {
+        setTimeout(() => alertBox.remove(), duration);
+    }
+    return alertBox;
 }
 
 // Function to capture the snapshot (shared by both button click and keyboard shortcut)

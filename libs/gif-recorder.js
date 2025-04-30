@@ -25,12 +25,7 @@ class GIFRecorder {
     }
 
     startRecording(video) {
-        if (this.recording) return;
-        
-        if (!this.workerBlobUrl) {
-            console.error('Worker script not initialized');
-            return;
-        }
+        if (this.recording || !this.workerBlobUrl) return;
 
         this.recording = true;
         this.frames = [];
@@ -61,10 +56,9 @@ class GIFRecorder {
         this.recording = false;
         
         try {
-            // Get video title and current time
+            const video = document.querySelector('video');
             const videoTitle = this.getTitleFromHeadTag();
-            const currentTime = document.querySelector('video').currentTime;
-            const formattedTime = this.formatTime(currentTime);
+            const formattedTime = this.formatTime(video.currentTime);
             
             // Render the GIF
             this.gif.on('finished', (blob) => {
@@ -109,6 +103,17 @@ class GIFRecorder {
         }
     }
 
+    getTitleFromHeadTag() {
+        let title = document.title.replace(/^\(\d+\)\s*/, '');
+        return title.endsWith(' - YouTube') ? title.replace(' - YouTube', '') : title.trim();
+    }
+
+    formatTime(seconds) {
+        const date = new Date(0);
+        date.setSeconds(seconds);
+        return date.toISOString().substring(11, 19).replace(/:/g, '.');
+    }
+
     isRecording() {
         return this.recording;
     }
@@ -119,27 +124,5 @@ class GIFRecorder {
 
     getDuration() {
         return this.startTime ? (Date.now() - this.startTime) / 1000 : 0;
-    }
-
-    // Helper function to fetch the video title from the <title> tag
-    getTitleFromHeadTag() {
-        let title = document.title;
-
-        // Remove leading notification count, e.g., (2) from the title
-        title = title.replace(/^\(\d+\)\s*/, '');
-
-        // YouTube usually appends " - YouTube" to the title, so we strip it off
-        if (title.endsWith(' - YouTube')) {
-            title = title.replace(' - YouTube', '');
-        }
-
-        return title.trim();
-    }
-
-    // Helper function to format time as HH-MM-SS
-    formatTime(seconds) {
-        const date = new Date(0);
-        date.setSeconds(seconds);
-        return date.toISOString().substring(11, 19).replace(/:/g, '.');
     }
 } 

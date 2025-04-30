@@ -35,10 +35,8 @@ function loadUserSettings() {
 // Watch for DOM changes (for YouTube's dynamic content)
 const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
-        if (mutation.type === 'childList' || mutation.type === 'attributes') {
-            if (document.querySelector('.ytp-right-controls')) {
-                injectButton(); // Re-inject the button if controls change
-            }
+        if ((mutation.type === 'childList' || mutation.type === 'attributes') && document.querySelector('.ytp-right-controls')) {
+            injectButton(); // Re-inject the button if controls change
         }
     }
 });
@@ -60,22 +58,27 @@ function injectButton() {
     snapshotButton.title = 'Take Snapshot';
     
     // Style the button to ensure proper dimensions and visibility
-    snapshotButton.style.width = 'auto';   // Adjust button size
-    snapshotButton.style.height = '100%';
-    snapshotButton.style.border = 'none';  // Remove default border
-    snapshotButton.style.background = 'transparent';  // Transparent background
-    snapshotButton.style.cursor = 'pointer';  // Pointer cursor for interactivity
-    snapshotButton.style.padding = '0';
-    snapshotButton.style.marginRight = '16px';
+    Object.assign(snapshotButton.style, {
+        width: 'auto',
+        height: '100%',
+        border: 'none',
+        background: 'transparent',
+        cursor: 'pointer',
+        padding: '0',
+        marginRight: '16px'
+    });
+
     snapshotButton.onmouseover = () => snapshotButton.style.opacity = 0.8;
     snapshotButton.onmouseout = () => snapshotButton.style.opacity = 1;
 
     // Create the img element for the button icon
     const img = document.createElement('img');
     img.src = chrome.runtime.getURL('icons/snapshot-icon.png');  // Updated image path
-    img.style.width = 'auto';  // Make image fill the button
-    img.style.height = '50%';
-    img.style.display = 'block';  // Remove inline image spacing issue
+    Object.assign(img.style, {
+        width: 'auto',
+        height: '50%',
+        display: 'block'
+    });
 
     // Insert the image inside the button
     snapshotButton.appendChild(img);
@@ -145,15 +148,17 @@ function handleGifRecording(video) {
 function showNotification(message, type = 'info') {
     const alertBox = document.createElement('div');
     alertBox.textContent = message;
-    alertBox.style.fontSize = "14px";
-    alertBox.style.position = 'fixed';
-    alertBox.style.bottom = '20px';
-    alertBox.style.right = '20px';
-    alertBox.style.backgroundColor = type === 'info' ? '#333' : '#ff4444';
-    alertBox.style.color = '#fff';
-    alertBox.style.padding = '12px 24px';
-    alertBox.style.borderRadius = '8px';
-    alertBox.style.zIndex = '1000';
+    Object.assign(alertBox.style, {
+        fontSize: "14px",
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        backgroundColor: type === 'info' ? '#333' : '#ff4444',
+        color: '#fff',
+        padding: '12px 24px',
+        borderRadius: '8px',
+        zIndex: '1000'
+    });
     document.body.appendChild(alertBox);
 
     // Remove the alert message after 3 seconds
@@ -223,25 +228,7 @@ async function saveImageToClipboard(canvas) {
         const blob = await new Promise((resolve) => canvas.toBlob(resolve));
         const item = new ClipboardItem({ "image/png": blob });
         await navigator.clipboard.write([item]);
-        // alert("Snapshot copied to clipboard!");
-
-        // Create a temporary alert message
-        const alertBox = document.createElement('div');
-        alertBox.textContent = "Snapshot copied to clipboard!";
-        alertBox.style.fontSize = "14px"
-        alertBox.style.position = 'fixed';
-        alertBox.style.bottom = '20px';
-        alertBox.style.right = '20px';
-        alertBox.style.backgroundColor = '#333';
-        alertBox.style.color = '#fff';
-        alertBox.style.padding = '12px 24px';
-        alertBox.style.borderRadius = '8px';
-        alertBox.style.zIndex = '1000';
-        document.body.appendChild(alertBox);
-
-        // Remove the alert message after 3 seconds
-        setTimeout(() => { alertBox.remove(); }, 3000);
-
+        showNotification("Snapshot copied to clipboard!");
     } catch (err) {
         console.error("Failed to copy image to clipboard: ", err);
     }

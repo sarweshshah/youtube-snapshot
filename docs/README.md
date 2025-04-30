@@ -2,18 +2,20 @@
 
 Capture and Save YouTube Moments with Ease
 
-This simple and lightweight extension adds a "Snapshot" button to the YouTube video player, allowing you to quickly capture and save any frame of a video as a PNG image. Perfect for grabbing those meme-worthy moments, saving reference images, or creating thumbnails for your own videos.
+This simple and lightweight extension adds a "Snapshot" button to the YouTube video player, allowing you to quickly capture and save any frame of a video as a PNG image or record a GIF of your favorite moments. Perfect for grabbing those meme-worthy moments, saving reference images, or creating thumbnails for your own videos.
 
 ## Key Features
 
 - **One-Click Snapshots**: Easily capture screenshots with a single click.
+- **GIF Recording**: Record short GIFs of your favorite moments with a simple keyboard shortcut.
 - **Save to Your Computer**: Download those snazzy screenshots as PNGs or JPGs.
 - **Copy to Clipboard**: Paste those pics anywhere you want!
-- **Keyboard Shortcuts**: Set up your own shortcut for lightning-fast captures.
-- **Smart File Names**: No more guessing games! Your screenshots will have the video title and timestamp.
+- **Keyboard Shortcuts**:
+  - Set up your own shortcut for lightning-fast captures
+  - Press 'g' to start/stop recording a GIF
+- **Smart File Names**: No more guessing games! Your screenshots and GIFs will have the video title and timestamp.
 - **Simple Setup:** Get snapping in seconds!
 - **Support for Embedded videos**: Works for both Youtube website and embedded videos
-
 
 ## Privacy Policy
 
@@ -31,7 +33,7 @@ The Extension requests the following permissions:
 - **Host permissions**: This permission allows the extension to interact with the YouTube video player from any website and enable the snapshot functionality.
 
 **How We Use Information**\
-The Extension uses the granted permissions solely to enable its core functionality: capturing a snapshot of the current YouTube video frame and saving it as an image file on your local device. No data is transmitted or stored outside of your browser.
+The Extension uses the granted permissions solely to enable its core functionality: capturing a snapshot of the current YouTube video frame and saving it as an image file on your local device, or recording a GIF of the video. No data is transmitted or stored outside of your browser.
 
 **Third-Party Sharing**\
 The Extension does not share any information with third-party services or websites.

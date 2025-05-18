@@ -1,34 +1,69 @@
+/* Theme Variables */
+:root {
+    /* Light theme (default) */
+    --bg-primary: #f9f9f9;
+    --bg-secondary: #fff;
+    --text-primary: #333;
+    --text-secondary: #5e5e5e;
+    --text-tertiary: #787878;
+    --border-color: #ddd;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --input-bg: #fff;
+    --input-disabled-bg: #f0f0f0;
+    --kbd-bg: #f7f7f7;
+    --kbd-border: #ccc;
+    --kbd-shadow: rgba(0, 0, 0, 0.2);
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: hsl(0, 0%, 17%);
+        --bg-secondary: hsl(0, 0%, 20%);
+        --text-primary: #e0e0e0;
+        --text-secondary: #b6b6b6;
+        --text-tertiary: #888;
+        --border-color: #404040;
+        --shadow-color: rgba(0, 0, 0, 0.3);
+        --input-bg: #3d3d3d;
+        --input-disabled-bg: #2a2a2a;
+        --kbd-bg: #3d3d3d00;
+        --kbd-border: #656565;
+        --kbd-shadow: rgba(0, 0, 0, 0.4);
+    }
+}
+
 body {
     font-family: Arial, sans-serif;
     /* Using the default font */
     margin: 0;
     padding: 12px 20px 16px 20px;
-    width: 250px;
-    background-color: #f9f9f9;
-    color: #333;
+    width: 300px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
 }
 
 h1 {
     font-size: 16px;
     margin-bottom: 15px;
     text-align: left;
-    color: #5e5e5e;
+    color: var(--text-secondary);
     font-weight: 600;
 }
 
 .section {
     margin-bottom: 12px;
-    background-color: #fff;
+    background-color: var(--bg-secondary);
     padding: 16px 16px 16px 16px;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px var(--shadow-color);
     /* Added box shadow for demarcation */
 }
 
 .section-title {
     font-size: 10px;
     margin-bottom: 12px;
-    color: #787878;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -43,7 +78,7 @@ h1 {
 
 .setting label {
     font-size: 14px;
-    color: #333;
+    color: var(--text-primary);
 }
 
 .setting input[type="checkbox"] {
@@ -56,17 +91,18 @@ h1 {
     text-align: center;
     font-size: 14px;
     padding: 0px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
-    background-color: #fff;
+    background-color: var(--input-bg);
+    color: var(--text-primary);
     transition: border-color 0.2s ease-in-out;
 }
 
 /* When input is disabled */
 .setting input[type="text"]:disabled {
-    background-color: #f0f0f0;
-    color: #aaa;
-    border-color: #ccc;
+    background-color: var(--input-disabled-bg);
+    color: var(--text-tertiary);
+    border-color: var(--border-color);
     opacity: 0.5;
     cursor: not-allowed;
 }
@@ -79,22 +115,22 @@ h1 {
 footer {
     text-align: center;
     font-size: 11px;
-    color: #888;
+    color: var(--text-tertiary);
     margin-top: 24px;
     border-radius: 18px;
 }
 
 .info-text {
-    color: #333;
+    color: var(--text-primary);
     font-size: 14px;
 }
 
 kbd {
-    background-color: #f7f7f7;
-    border: 1px solid #ccc;
+    background-color: var(--kbd-bg);
+    border: 1px solid var(--kbd-border);
     border-radius: 4px;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
-    color: #333;
+    box-shadow: 0 1px 0 var(--kbd-shadow);
+    color: var(--text-primary);
     display: inline-block;
     font-size: 0.9em;
     font-weight: 500;

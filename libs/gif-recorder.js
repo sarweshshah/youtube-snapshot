@@ -101,11 +101,11 @@ class GIFRecorder {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
             // Add frame to GIF
-            this.gif.addFrame(ctx, { copy: true, delay: 100 }); // 10fps = 100ms delay
+            this.gif.addFrame(ctx, { copy: true, delay: 33.33 }); // 30fps = 33.33ms delay
             this.frameCount++;
 
             // Schedule next frame capture
-            setTimeout(() => this.captureFrame(video), 100);
+            setTimeout(() => this.captureFrame(video), 33.33);
         } catch (error) {
             console.error('Error capturing frame:', error);
             this.recording = false;

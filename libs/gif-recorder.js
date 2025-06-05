@@ -134,4 +134,7 @@ class GIFRecorder {
     getDuration() {
         return this.startTime ? (Date.now() - this.startTime) / 1000 : 0;
     }
-} 
+}
+
+// Expose GIFRecorder to global scope
+window.GIFRecorder = GIFRecorder; 

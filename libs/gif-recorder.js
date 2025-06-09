@@ -51,38 +51,44 @@ class GIFRecorder {
     }
 
     stopRecording() {
+        // Check if recording is in progress
         if (!this.recording) return;
         
+        // Stop the recording process
         this.recording = false;
         
         try {
+            // Get video element and prepare metadata for filename
             const video = document.querySelector('video');
             const videoTitle = this.getTitleFromHeadTag();
             const formattedTime = this.formatTime(video.currentTime);
             
+            // Set up progress tracking for GIF generation
             this.gif.on('progress', (p) => {
-                // Emit progress event
+                // Emit progress event to notify UI of generation status
                 const event = new CustomEvent('gifProgress', { detail: p });
                 document.dispatchEvent(event);
             });
 
+            // Handle GIF generation completion
             this.gif.on('finished', (blob) => {
-                // Create download link with formatted filename
+                // Create and trigger download with formatted filename
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = `${videoTitle} [${formattedTime}].gif`;
                 link.click();
                 
-                // Cleanup
+                // Clean up resources
                 URL.revokeObjectURL(link.href);
                 this.frames = [];
                 this.gif = null;
 
-                // Emit finished event
+                // Notify UI that GIF generation is complete
                 const event = new CustomEvent('gifFinished');
                 document.dispatchEvent(event);
             });
 
+            // Start the GIF rendering process
             this.gif.render();
         } catch (error) {
             console.error('Error rendering GIF:', error);

@@ -7,6 +7,7 @@ class GIFRecorder {
         this.frameCount = 0;
         this.startTime = null;
         this.workerBlobUrl = null;
+        this.isCancelled = false;
         this.initializeWorker();
     }
 
@@ -56,6 +57,7 @@ class GIFRecorder {
         
         // Stop the recording process
         this.recording = false;
+        this.isCancelled = false;
         
         try {
             // Get video element and prepare metadata for filename
@@ -65,6 +67,7 @@ class GIFRecorder {
             
             // Set up progress tracking for GIF generation
             this.gif.on('progress', (p) => {
+                if (this.isCancelled) return;
                 // Emit progress event to notify UI of generation status
                 const event = new CustomEvent('gifProgress', { detail: p });
                 document.dispatchEvent(event);
@@ -72,6 +75,7 @@ class GIFRecorder {
 
             // Handle GIF generation completion
             this.gif.on('finished', (blob) => {
+                if (this.isCancelled) return;
                 // Create and trigger download with formatted filename
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
@@ -139,6 +143,25 @@ class GIFRecorder {
 
     getDuration() {
         return this.startTime ? (Date.now() - this.startTime) / 1000 : 0;
+    }
+
+    cancelRecording() {
+        if (!this.recording && !this.gif) return;
+        
+        // Mark as cancelled to prevent finished event from triggering
+        this.isCancelled = true;
+        
+        // Stop the recording process
+        this.recording = false;
+        
+        // Clean up resources
+        if (this.gif) {
+            this.gif.abort();
+            this.gif = null;
+        }
+        this.frames = [];
+        this.frameCount = 0;
+        this.startTime = null;
     }
 }
 

@@ -141,15 +141,45 @@ function setupKeyboardShortcut() {
 function handleGifRecording(video) {
     if (!gifRecorder.isRecording()) {
         gifRecorder.startRecording(video);
-        showNotification('GIF recording started...', 'info');
+        showNotification('GIF recording started', 'info');
     } else {
         gifRecorder.stopRecording();
         const progressBox = showNotification('Processing GIF...', 'progress', 0);
         
+        // Add cancel button to the processing notification
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'Cancel';
+        Object.assign(cancelButton.style, {
+            marginLeft: '4px',
+            padding: '4px 8px',
+            backgroundColor: '#ff4444',
+            border: 'none',
+            borderRadius: '4px',
+            color: 'white',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s ease'
+        });
+        cancelButton.onmouseover = () => cancelButton.style.backgroundColor = '#ff6666';
+        cancelButton.onmouseout = () => cancelButton.style.backgroundColor = '#ff4444';
+        
+        cancelButton.onclick = () => {
+            gifRecorder.cancelRecording();
+            progressBox.remove();
+            currentNotification = null;
+            showNotification('GIF processing cancelled', 'info');
+        };
+        
+        progressBox.appendChild(cancelButton);
+        
         // Update progress message when GIF is ready
         gifRecorder.gif.on('progress', (p) => {
             if (currentNotification === progressBox) {
-                progressBox.textContent = `Processing GIF... ${Math.round(p * 100)}%`;
+                // Store the button temporarily
+                const tempButton = progressBox.querySelector('button');
+                // Update the text content
+                progressBox.textContent = `Processing GIF... ${String(Math.round(p * 100)).padStart(2, '0')}%`;
+                // Re-append the button
+                progressBox.appendChild(tempButton);
             }
         });
 
@@ -157,7 +187,7 @@ function handleGifRecording(video) {
             if (currentNotification === progressBox) {
                 progressBox.remove();
                 currentNotification = null;
-                showNotification('GIF saved successfully!', 'info');
+                showNotification('GIF saved successfully!', 'success');
             }
         });
     }
@@ -178,16 +208,16 @@ function showNotification(message, type = 'info', duration = 3000) {
         position: 'fixed',
         bottom: '20px',
         right: '20px',
-        backgroundColor: type === 'info' ? '#333' : '#ff4444',
+        backgroundColor: type === 'info' ? '#333' : type === 'success' ? '#409656' : '#ff4444',
         color: '#fff',
-        padding: '12px 24px',
+        padding: '12px 16px',
         borderRadius: '8px',
-        zIndex: '1000',
+        zIndex: '1000', 
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
+        gap: '8px',
         opacity: '0',
-        transition: 'opacity 0.3s ease-in-out'
+        transition: 'opacity 0.2s ease-in-out'
     });
 
     if (type === 'progress') {
@@ -300,7 +330,7 @@ async function saveImageToClipboard(canvas) {
         const blob = await new Promise((resolve) => canvas.toBlob(resolve));
         const item = new ClipboardItem({ "image/png": blob });
         await navigator.clipboard.write([item]);
-        showNotification("Snapshot copied to clipboard!");
+        showNotification('Snapshot copied to clipboard!', 'success');
     } catch (err) {
         console.error("Failed to copy image to clipboard: ", err);
     }

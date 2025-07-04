@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         
             fileOption.checked = data.saveAsFile ?? true;
-            clipboardOption.checked = data.saveToClipboard ?? false;
+            clipboardOption.checked = data.saveToClipboard ?? true;
             formatOption.value = data.fileFormat ?? 'png';
             soundOption.checked = data.playSound ?? true;
         

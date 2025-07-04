@@ -22,7 +22,7 @@ function loadUserSettings() {
             chrome.storage.sync.set({ saveAsFile: true });  // Default: Save as File is enabled
         }
         if (data.saveToClipboard === undefined) {
-            chrome.storage.sync.set({ saveToClipboard: false });  // Default: Save to Clipboard is disabled
+            chrome.storage.sync.set({ saveToClipboard: true });  // Default: Save to Clipboard is enabled
         }
         if (data.enableKeypress === undefined) {
             chrome.storage.sync.set({ enableKeypress: true });  // Default: Enable keyboard shortcuts

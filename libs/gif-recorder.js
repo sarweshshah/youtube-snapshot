@@ -8,6 +8,8 @@ class GIFRecorder {
         this.startTime = null;
         this.workerBlobUrl = null;
         this.isCancelled = false;
+        this.canvas = null; // Reusable canvas
+        this.ctx = null;    // Reusable context
         this.initializeWorker();
     }
 
@@ -32,6 +34,12 @@ class GIFRecorder {
         this.frames = [];
         this.frameCount = 0;
         this.startTime = Date.now();
+
+        // Create reusable canvas/context sized to video
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = video.videoWidth;
+        this.canvas.height = video.videoHeight;
+        this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
         
         try {
             // Create new GIF instance
@@ -103,19 +111,15 @@ class GIFRecorder {
         if (!this.recording) return;
 
         try {
-            // Create canvas and capture frame
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // Reuse canvas/context
+            this.ctx.drawImage(video, 0, 0, this.canvas.width, this.canvas.height);
 
-            // Add frame to GIF
-            this.gif.addFrame(ctx, { copy: true, delay: 33.33 }); // 30fps = 33.33ms delay
+            // Add frame to GIF (10fps = 100ms delay)
+            this.gif.addFrame(this.ctx, { copy: true, delay: 100 });
             this.frameCount++;
 
-            // Schedule next frame capture
-            setTimeout(() => this.captureFrame(video), 33.33);
+            // Schedule next frame capture (100ms interval)
+            setTimeout(() => this.captureFrame(video), 100);
         } catch (error) {
             console.error('Error capturing frame:', error);
             this.recording = false;
@@ -162,6 +166,8 @@ class GIFRecorder {
         this.frames = [];
         this.frameCount = 0;
         this.startTime = null;
+        this.canvas = null;
+        this.ctx = null;
     }
 }
 

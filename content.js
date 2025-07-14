@@ -1,3 +1,5 @@
+// content.js - Injects snapshot button, handles user settings, keyboard shortcuts, and GIF recording on YouTube
+
 let currentShortcutKey = 's'; // Default shortcut key
 let gifRecorder = new GIFRecorder(); // Initialize GIF recorder
 let currentNotification = null;
@@ -5,7 +7,7 @@ let currentNotification = null;
 // Inject the snapshot button immediately when the script loads
 injectButton();
 
-// Load user settings, observe the page, and inject button
+// On window load, initialize user settings, observers, and keyboard shortcuts
 window.onload = function () {
     console.log('Window loaded, initializing...');
     loadUserSettings();             // Load initial user settings
@@ -33,7 +35,7 @@ function loadUserSettings() {
     });
 }
 
-// Watch for DOM changes (for YouTube's dynamic content)
+// MutationObserver to watch for DOM changes (for YouTube's dynamic content)
 const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
         if ((mutation.type === 'childList' || mutation.type === 'attributes') && document.querySelector('.ytp-right-controls')) {
@@ -51,14 +53,15 @@ function observePage() {
 function injectButton() {
     const controls = document.querySelector('.ytp-right-controls');
 
-    if (!controls || document.getElementById('snapshotButton')) return; // Avoid duplicate buttons
+    // Avoid duplicate buttons
+    if (!controls || document.getElementById('snapshotButton')) return;
 
     // Create the snapshot button
     const snapshotButton = document.createElement('button');
     snapshotButton.id = 'snapshotButton';
     snapshotButton.title = 'Take Snapshot';
     
-    // Style the button to ensure proper dimensions and visibility
+    // Style the button for proper dimensions and visibility
     Object.assign(snapshotButton.style, {
         width: 'auto',
         height: '100%',
@@ -91,19 +94,20 @@ function injectButton() {
     snapshotButton.addEventListener('click', takeSnapshot);
 }
 
-// Dynamically handle keypress shortcut functionality
+// Set up dynamic keypress shortcut functionality
 function setupKeyboardShortcut() {
     let keypressListener;
 
+    // Helper to update the keypress event listener
     const updateKeypressListener = () => {
-        // Remove the old listener
+        // Remove the old listener if it exists
         if (keypressListener) {
             document.removeEventListener('keypress', keypressListener);
         }
 
-        // Check for the current keypress setting
+        // Get current keypress settings from storage
         chrome.storage.sync.get(['enableKeypress', 'shortcutKey'], (data) => {
-            // Always enable keyboard shortcuts
+            // Always enable keyboard shortcuts (can be changed to respect user setting)
             const isEnabled = true; // Force enable keyboard shortcuts
             const shortcutKey = data.shortcutKey || 's';
 
@@ -137,7 +141,7 @@ function setupKeyboardShortcut() {
     });
 }
 
-// Handle GIF recording
+// Handle GIF recording logic (start/stop, show notifications, handle progress/cancel)
 function handleGifRecording(video) {
     if (!gifRecorder.isRecording()) {
         gifRecorder.startRecording(video);
@@ -193,7 +197,7 @@ function handleGifRecording(video) {
     }
 }
 
-// Show notification
+// Show notification (info, success, error, or progress)
 function showNotification(message, type = 'info', duration = 3000) {
     // Remove previous notification if it exists
     if (currentNotification) {

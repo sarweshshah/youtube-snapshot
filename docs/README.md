@@ -17,6 +17,11 @@ This simple and lightweight extension adds a "Snapshot" button to the YouTube vi
 - **Simple Setup:** Get snapping in seconds!
 - **Support for Embedded videos**: Works for both Youtube website and embedded videos
 
+## Repository Structure and Script Flow
+
+![Repository Structure and Script Flow](repository-structure.png)
+_This diagram shows the architecture and data flow of the YouTube Snapshot extension._
+
 ## Privacy Policy
 
 This Privacy Policy describes how the YouTube Snapshot Chrome extension ("the Extension") handles your information.

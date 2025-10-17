@@ -1,67 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="light dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <title>YouTube Snapshot Settings</title>
-    <link rel="stylesheet" href="popup.css"> <!-- Link to external CSS file -->
-</head>
+    <link rel="stylesheet" href="popup.css" />
+    <!-- Link to external CSS file -->
+  </head>
 
-<body>
+  <body>
     <h1>Snapshot Settings</h1>
 
     <!-- Grouped File Options -->
     <div class="section">
-        <div class="section-title">Output</div>
-        <div class="setting" style="margin-bottom: 8px;">
-            <label for="clipboardOption">Save to Clipboard</label>
-            <input type="checkbox" id="clipboardOption" />
-        </div>
-        <div class="setting" id="fileOption_div">
-            <label for="fileOption">Save as File</label>
-            <input type="checkbox" id="fileOption" checked />
-        </div>
-        <div class="setting" id="formatSetting" style="display: none;">
-            <label for="formatOption">File Format</label>
-            <select id="formatOption">
-                <option value="png">PNG</option>
-                <option value="jpg">JPG</option>
-            </select>
-        </div>
+      <div class="section-title">Output</div>
+      <div class="setting" style="margin-bottom: 8px">
+        <label for="clipboardOption">Save to Clipboard</label>
+        <input type="checkbox" id="clipboardOption" />
+      </div>
+      <div class="setting" id="fileOption_div">
+        <label for="fileOption">Save as File</label>
+        <input type="checkbox" id="fileOption" checked />
+      </div>
+      <div class="setting" id="formatSetting" style="display: none">
+        <label for="formatOption">File Format</label>
+        <select id="formatOption">
+          <option value="png">PNG</option>
+          <option value="jpg">JPG</option>
+        </select>
+      </div>
     </div>
 
     <!-- Grouped Clipboard Options -->
     <div class="section">
-        <div class="section-title">Sound</div>
-        <div class="setting">
-            <label for="soundOption">Play Sound</label>
-            <input type="checkbox" id="soundOption" checked />
-        </div>
+      <div class="section-title">Sound</div>
+      <div class="setting">
+        <label for="soundOption">Play Sound</label>
+        <input type="checkbox" id="soundOption" checked />
+      </div>
     </div>
 
     <!-- Grouped Shortcut Key Option -->
     <div class="section">
-        <div class="section-title">Keypress Shortcut</div>
-        <div class="setting" style="margin-bottom: 8px;">
-            <label for="keypressOption">Change Shortcut</label>
-            <input type="checkbox" id="keypressOption" />
-        </div>
-        <div class="setting" id="shortcutContainer">
-            <label for="shortcutInput">Shortcut Key</label>
-            <input type="text" id="shortcutInput" maxlength="1" value="s" disabled /> <!-- Initially disabled -->
-        </div>
-        <div class="setting" style="margin-top: 8px;">
-            <span class="info-text">Press <kbd>g</kbd> to start/stop recording a GIF</span>
-        </div>
+      <div class="section-title">Keypress Shortcut</div>
+      <div class="setting" style="margin-bottom: 8px">
+        <label for="keypressOption">Change Shortcut</label>
+        <input type="checkbox" id="keypressOption" />
+      </div>
+      <div class="setting" id="shortcutContainer">
+        <label for="shortcutInput">Shortcut Key</label>
+        <input
+          type="text"
+          id="shortcutInput"
+          maxlength="1"
+          value="s"
+          disabled
+        />
+        <!-- Initially disabled -->
+      </div>
+      <div class="setting" style="margin-top: 8px">
+        <span class="info-text"
+          >Press <kbd>g</kbd> to start/stop recording a GIF</span
+        >
+      </div>
     </div>
 
-    <footer>
-        YouTube Snapshot Extension v<span id="version"></span>
-    </footer>
+    <footer>YouTube Snapshot Extension v<span id="version"></span></footer>
 
     <script src="popup.js"></script>
-</body>
-
+  </body>
 </html>

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Snapshot",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Take snapshots of YouTube videos and save to clipboard or file.",
   "permissions": ["storage", "webNavigation", "scripting"],
   "host_permissions": ["<all_urls>"],

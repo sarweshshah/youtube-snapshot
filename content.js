@@ -98,6 +98,7 @@ function injectButton() {
   const snapshotButton = document.createElement("button");
   snapshotButton.id = "snapshotButton";
   snapshotButton.title = "Take Snapshot";
+  snapshotButton.classList.add("ytp-button");
 
   // Style the button for proper dimensions and visibility
   Object.assign(snapshotButton.style, {
@@ -106,12 +107,10 @@ function injectButton() {
     border: "none",
     background: "transparent",
     cursor: "pointer",
-    padding: "0",
-    marginRight: "16px",
+    padding: "0 12px",
+    marginRight: "4px",
+    marginLeft: "4px",
   });
-
-  snapshotButton.onmouseover = () => (snapshotButton.style.opacity = 0.8);
-  snapshotButton.onmouseout = () => (snapshotButton.style.opacity = 1);
 
   // Create the img element for the button icon
   const img = document.createElement("img");

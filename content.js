@@ -97,7 +97,7 @@ function injectButton() {
   // Create the snapshot button
   const snapshotButton = document.createElement("button");
   snapshotButton.id = "snapshotButton";
-  snapshotButton.title = "Take Snapshot";
+  snapshotButton.title = "Take Snapshot (S) | Record GIF (G)";
   snapshotButton.classList.add("ytp-button");
 
   // Style the button for proper dimensions and visibility
@@ -371,8 +371,6 @@ function takeSnapshot() {
         saveImageToClipboard(canvas);
       }
 
-      // Check if the sound option is enabled and play the sound
-      chrome.storage.sync.get(["playSound"], (data) => {
       if (data.playSound !== false) {
           // Default to true
         const audio = new Audio(
@@ -381,8 +379,9 @@ function takeSnapshot() {
         audio
           .play()
           .catch((error) => console.error("Error playing sound:", error));
+      }
     }
-  });
+  );
 }
 
 // Function to save image to the clipboard

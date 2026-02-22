@@ -4,8 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Get references to DOM elements
   const fileOption = document.getElementById("fileOption");
   const clipboardOption = document.getElementById("clipboardOption");
-  const keypressOption = document.getElementById("keypressOption");
-  const shortcutInput = document.getElementById("shortcutInput");
   const formatOption = document.getElementById("formatOption");
   const formatSetting = document.getElementById("formatSetting");
   const versionElement = document.getElementById("version");
@@ -30,8 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
       [
         "saveAsFile",
         "saveToClipboard",
-        "enableKeypress",
-        "shortcutKey",
         "fileFormat",
         "playSound",
       ],
@@ -47,11 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fileOption.checked = data.saveAsFile ?? true;
         clipboardOption.checked = data.saveToClipboard ?? true;
         formatOption.value = data.fileFormat ?? "png";
-        soundOption.checked = data.playSound ?? true;
-        keypressOption.checked = data.enableKeypress ?? false;
-        shortcutInput.value = data.shortcutKey ?? "s";
-        // Disable shortcut input unless keypress option is checked
-        shortcutInput.disabled = !keypressOption.checked;
+        soundOption.checked = !(data.playSound ?? true);
         toggleFormatOption();
         validateOutputOptions();
       }
@@ -72,29 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
     validateOutputOptions();
   });
 
-  // Save keypress option and enable/disable shortcut input
-  keypressOption.addEventListener("change", () => {
-    const isEnabled = keypressOption.checked;
-    chrome.storage.sync.set({ enableKeypress: isEnabled });
-    shortcutInput.disabled = !isEnabled; // Enable/Disable input field
-  });
-
-  // Save shortcut key when input is changed (only allow single lowercase letter)
-  shortcutInput.addEventListener("input", () => {
-    const newShortcut = shortcutInput.value.trim().toLowerCase();
-    if (/^[a-z]$/.test(newShortcut)) {
-      chrome.storage.sync.set({ shortcutKey: newShortcut });
-    } else {
-      shortcutInput.value = ""; // Clear invalid input
-    }
-  });
-
   formatOption.addEventListener("change", () => {
     chrome.storage.sync.set({ fileFormat: formatOption.value });
   });
 
   soundOption.addEventListener("change", () => {
-    chrome.storage.sync.set({ playSound: soundOption.checked });
+    chrome.storage.sync.set({ playSound: !soundOption.checked });
   });
 
   // Display the extension version in the popup

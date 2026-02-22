@@ -23,3 +23,6 @@ icons/.DS_Store
 .vscode/*
 *.code-workspace
 .history/
+
+# Cursor assets
+*.plan.md

@@ -141,6 +141,16 @@ footer {
     font-size: 14px;
 }
 
+.warning-text {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 8px;
+    padding: 6px 8px;
+    background-color: rgba(231, 76, 60, 0.1);
+    border-radius: var(--border-radius-small);
+    width: 100%;
+}
+
 kbd {
     background-color: var(--kbd-bg);
     border: 1px solid var(--kbd-border);

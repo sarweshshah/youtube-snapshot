@@ -330,8 +330,16 @@ function takeSnapshot() {
   const sanitizedTitle = videoTitle.trim();
 
   chrome.storage.sync.get(
-    ["fileFormat", "saveAsFile", "saveToClipboard"],
+    ["fileFormat", "saveAsFile", "saveToClipboard", "playSound"],
     (data) => {
+      if (!data.saveAsFile && !data.saveToClipboard) {
+        showNotification(
+          "No output enabled — check extension settings",
+          "error"
+        );
+        return;
+      }
+
       const format = data.fileFormat || "png";
       const mimeType = format === "jpg" ? "image/jpeg" : "image/png";
       const extension = format === "jpg" ? "jpg" : "png";
@@ -365,18 +373,16 @@ function takeSnapshot() {
 
       // Check if the sound option is enabled and play the sound
       chrome.storage.sync.get(["playSound"], (data) => {
-        if (data.playSound !== false) {
+      if (data.playSound !== false) {
           // Default to true
-          const audio = new Audio(
-            chrome.runtime.getURL("audio/download-sound.mp3")
-          );
-          audio
-            .play()
-            .catch((error) => console.error("Error playing sound:", error));
-        }
-      });
+        const audio = new Audio(
+          chrome.runtime.getURL("audio/download-sound.mp3")
+        );
+        audio
+          .play()
+          .catch((error) => console.error("Error playing sound:", error));
     }
-  );
+  });
 }
 
 // Function to save image to the clipboard

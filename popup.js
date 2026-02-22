@@ -10,11 +10,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const formatSetting = document.getElementById("formatSetting");
   const versionElement = document.getElementById("version");
   const soundOption = document.getElementById("soundOption");
+  const outputWarning = document.getElementById("outputWarning");
 
   // Show or hide file format option based on "Save as File" checkbox state
   const toggleFormatOption = () => {
     formatSetting.style.display = fileOption.checked ? "flex" : "none";
-    formatSetting.style.marginTop = fileOption.checked ? "8px" : "0px"; // Adjust margin-top
+    formatSetting.style.marginTop = fileOption.checked ? "8px" : "0px";
+  };
+
+  const validateOutputOptions = () => {
+    const noneSelected = !fileOption.checked && !clipboardOption.checked;
+    outputWarning.style.display = noneSelected ? "block" : "none";
+    return !noneSelected;
   };
 
   // Load saved preferences from chrome.storage and update UI
@@ -45,7 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
         shortcutInput.value = data.shortcutKey ?? "s";
         // Disable shortcut input unless keypress option is checked
         shortcutInput.disabled = !keypressOption.checked;
-        toggleFormatOption(); // Ensure proper visibility based on saved state
+        toggleFormatOption();
+        validateOutputOptions();
       }
     );
   } catch (error) {
@@ -55,11 +63,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Save preferences when checkboxes or dropdowns are changed
   fileOption.addEventListener("change", () => {
     chrome.storage.sync.set({ saveAsFile: fileOption.checked });
-    toggleFormatOption(); // Update visibility and margin of file format option
+    toggleFormatOption();
+    validateOutputOptions();
   });
 
   clipboardOption.addEventListener("change", () => {
     chrome.storage.sync.set({ saveToClipboard: clipboardOption.checked });
+    validateOutputOptions();
   });
 
   // Save keypress option and enable/disable shortcut input

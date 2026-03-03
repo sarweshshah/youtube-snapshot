@@ -182,13 +182,15 @@ function setupKeyboardShortcut() {
 // Handle GIF recording logic (start/stop, show notifications, handle progress/cancel)
 function handleGifRecording(video) {
   if (!gifRecorder.isRecording()) {
-    gifRecorder.startRecording(video);
-    showNotification("GIF recording started", "info");
+    if (gifRecorder.startRecording(video)) {
+      showNotification("GIF recording started", "info");
+    } else {
+      showNotification("Failed to start GIF recording", "error");
+    }
   } else {
     gifRecorder.stopRecording();
     const progressBox = showNotification("Processing GIF...", "progress", 0);
 
-    // Add cancel button to the processing notification
     const cancelButton = document.createElement("button");
     cancelButton.textContent = "Cancel";
     Object.assign(cancelButton.style, {
@@ -208,6 +210,7 @@ function handleGifRecording(video) {
 
     cancelButton.onclick = () => {
       gifRecorder.cancelRecording();
+      cleanup();
       progressBox.remove();
       currentNotification = null;
       showNotification("GIF processing cancelled", "info");
@@ -215,27 +218,43 @@ function handleGifRecording(video) {
 
     progressBox.appendChild(cancelButton);
 
-    // Update progress message when GIF is ready
-    gifRecorder.gif.on("progress", (p) => {
+    const onProgress = (e) => {
       if (currentNotification === progressBox) {
-        // Store the button temporarily
         const tempButton = progressBox.querySelector("button");
-        // Update the text content
         progressBox.textContent = `Processing GIF... ${String(
-          Math.round(p * 100)
+          Math.round(e.detail * 100)
         ).padStart(2, "0")}%`;
-        // Re-append the button
         progressBox.appendChild(tempButton);
       }
-    });
+    };
 
-    gifRecorder.gif.on("finished", () => {
+    const onFinished = () => {
+      cleanup();
       if (currentNotification === progressBox) {
         progressBox.remove();
         currentNotification = null;
         showNotification("GIF saved successfully!", "success");
       }
-    });
+    };
+
+    const onError = () => {
+      cleanup();
+      if (currentNotification === progressBox) {
+        progressBox.remove();
+        currentNotification = null;
+        showNotification("Failed to process GIF", "error");
+      }
+    };
+
+    function cleanup() {
+      document.removeEventListener("gifProgress", onProgress);
+      document.removeEventListener("gifFinished", onFinished);
+      document.removeEventListener("gifError", onError);
+    }
+
+    document.addEventListener("gifProgress", onProgress);
+    document.addEventListener("gifFinished", onFinished);
+    document.addEventListener("gifError", onError);
   }
 }
 

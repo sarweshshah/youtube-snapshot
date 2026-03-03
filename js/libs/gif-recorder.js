@@ -13,19 +13,21 @@ class GIFRecorder {
     this.ctx = null;
     this.width = 0;
     this.height = 0;
+    this.chunks = [];
 
     chrome.runtime.onMessage.addListener((msg) => {
       switch (msg.type) {
+        case "gif-chunk":
+          this.handleChunk(msg);
+          break;
         case "gif-progress":
           document.dispatchEvent(
             new CustomEvent("gifProgress", { detail: msg.progress })
           );
           break;
-        case "gif-finished":
-          this.handleFinished(msg);
-          break;
         case "gif-error":
           this.frames = [];
+          this.chunks = [];
           document.dispatchEvent(
             new CustomEvent("gifError", { detail: msg.error })
           );
@@ -42,8 +44,13 @@ class GIFRecorder {
     this.frames = [];
     this.frameCount = 0;
     this.startTime = Date.now();
-    this.width = video.videoWidth;
-    this.height = video.videoHeight;
+    
+    // We previously scaled down to 640px to avoid hitting limits, 
+    // but with chunking, we can allow full resolution (or up to 720p for memory safety)
+    const MAX_WIDTH = 1280; 
+    const scale = Math.min(1, MAX_WIDTH / video.videoWidth);
+    this.width = Math.floor(video.videoWidth * scale);
+    this.height = Math.floor(video.videoHeight * scale);
 
     this.canvas = document.createElement("canvas");
     this.canvas.width = this.width;
@@ -152,6 +159,29 @@ class GIFRecorder {
     return btoa(binary);
   }
 
+  handleChunk(msg) {
+    if (this.isCancelled) return;
+    
+    this.chunks[msg.index] = msg.chunk;
+    
+    let receivedCount = 0;
+    for (let i = 0; i < msg.total; i++) {
+      if (this.chunks[i] !== undefined) {
+        receivedCount++;
+      }
+    }
+    
+    if (receivedCount === msg.total) {
+      const dataUrl = this.chunks.join("");
+      this.chunks = [];
+      this.handleFinished({
+        dataUrl,
+        videoTitle: msg.videoTitle,
+        formattedTime: msg.formattedTime
+      });
+    }
+  }
+
   handleFinished(msg) {
     if (this.isCancelled) return;
 
@@ -189,11 +219,12 @@ class GIFRecorder {
   }
 
   cancelRecording() {
-    if (!this.recording && this.frames.length === 0) return;
+    if (!this.recording && this.frames.length === 0 && this.chunks.length === 0) return;
 
     this.isCancelled = true;
     this.recording = false;
     this.frames = [];
+    this.chunks = [];
     this.frameCount = 0;
     this.startTime = null;
     this.canvas = null;

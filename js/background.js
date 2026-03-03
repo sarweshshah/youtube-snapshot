@@ -66,6 +66,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (
     msg.type === "gif-progress" ||
     msg.type === "gif-finished" ||
+    msg.type === "gif-chunk" ||
     msg.type === "gif-error"
   ) {
     if (msg.tabId) {

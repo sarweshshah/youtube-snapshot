@@ -65,12 +65,21 @@ function renderGIF(videoTitle, formattedTime) {
     currentGif.on("finished", (blob) => {
       const reader = new FileReader();
       reader.onload = () => {
-        sendToTab({
-          type: "gif-finished",
-          dataUrl: reader.result,
-          videoTitle,
-          formattedTime,
-        });
+        const dataUrl = reader.result;
+        const CHUNK_SIZE = 10 * 1024 * 1024; // 10MB chunks
+        const totalChunks = Math.ceil(dataUrl.length / CHUNK_SIZE);
+        
+        for (let i = 0; i < totalChunks; i++) {
+          const chunk = dataUrl.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+          sendToTab({
+            type: "gif-chunk",
+            chunk: chunk,
+            index: i,
+            total: totalChunks,
+            videoTitle,
+            formattedTime,
+          });
+        }
         cleanup();
       };
       reader.readAsDataURL(blob);

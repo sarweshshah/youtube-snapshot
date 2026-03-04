@@ -183,20 +183,50 @@ function setupKeyboardShortcut() {
 function handleGifRecording(video) {
   if (!gifRecorder.isRecording()) {
     if (gifRecorder.startRecording(video)) {
-      showNotification(`GIF recording started (max ${gifRecorder.maxDuration}s)`, "info");
+      showNotification("GIF recording started", "info");
 
       // Listen for auto-stop and process the GIF
       const onAutoStop = () => {
         document.removeEventListener("gifAutoStopped", onAutoStop);
+        removeVideoPauseListeners();
         showGifProcessingUI();
       };
       document.addEventListener("gifAutoStopped", onAutoStop);
+
+      // Show toast when video is paused/resumed during recording
+      const onPause = () => {
+        if (gifRecorder.isRecording()) {
+          showNotification("Recording paused", "info");
+        }
+      };
+      const onPlay = () => {
+        if (gifRecorder.isRecording()) {
+          showNotification("Recording resumed", "info");
+        }
+      };
+      video.addEventListener("pause", onPause);
+      video.addEventListener("play", onPlay);
+
+      // Store references for cleanup
+      gifRecorder._videoPauseCleanup = () => {
+        video.removeEventListener("pause", onPause);
+        video.removeEventListener("play", onPlay);
+      };
     } else {
       showNotification("Failed to start GIF recording", "error");
     }
   } else {
+    removeVideoPauseListeners();
     gifRecorder.stopRecording();
     showGifProcessingUI();
+  }
+}
+
+// Remove video pause/play listeners attached during GIF recording
+function removeVideoPauseListeners() {
+  if (gifRecorder._videoPauseCleanup) {
+    gifRecorder._videoPauseCleanup();
+    gifRecorder._videoPauseCleanup = null;
   }
 }
 
@@ -222,6 +252,7 @@ function showGifProcessingUI() {
     (cancelButton.style.backgroundColor = "#ff4444");
 
   cancelButton.onclick = () => {
+    removeVideoPauseListeners();
     gifRecorder.cancelRecording();
     cleanup();
     progressBox.remove();

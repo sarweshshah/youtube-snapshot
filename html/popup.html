@@ -9,7 +9,7 @@
   </head>
 
   <body>
-    <h1>Snapshot Settings</h1>
+    <h1>Settings</h1>
 
     <!-- Snapshot Output -->
     <div class="section">
@@ -60,11 +60,10 @@
       </div>
       <div class="setting">
         <label for="gifMaxWidth">Frame Width</label>
-        <select id="gifMaxWidth">
-          <option value="480">480px</option>
-          <option value="720">720px</option>
-          <option value="0" selected>Source</option>
-        </select>
+        <div class="slider-group">
+          <input type="range" id="gifMaxWidth" min="0" max="2" step="1" value="1" />
+          <span id="gifMaxWidthValue" class="slider-value">720px</span>
+        </div>
       </div>
       <div id="gifEstimate" class="estimate-text"></div>
       <div id="gifWarning" class="warning-text warning-text--caution" style="display: none">

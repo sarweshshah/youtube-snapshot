@@ -17,8 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const gifMaxDuration = document.getElementById("gifMaxDuration");
   const durationValue = document.getElementById("durationValue");
   const gifMaxWidth = document.getElementById("gifMaxWidth");
+  const gifMaxWidthValue = document.getElementById("gifMaxWidthValue");
   const gifEstimate = document.getElementById("gifEstimate");
   const gifWarning = document.getElementById("gifWarning");
+
+  const gifWidthValues = [480, 720, 1080];
 
   // Show or hide file format option based on "Save as File" checkbox state
   const toggleFormatOption = () => {
@@ -35,10 +38,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const updateGifEstimate = () => {
     const fps = parseInt(gifFramerate.value, 10);
     const duration = parseInt(gifMaxDuration.value, 10);
-    const maxW = parseInt(gifMaxWidth.value, 10);
+    const width = gifWidthValues[parseInt(gifMaxWidth.value, 10)];
 
     // Assume 16:9 aspect ratio
-    const width = maxW > 0 ? maxW : 1920;
     const height = Math.round(width * 9 / 16);
     const totalFrames = fps * duration;
 
@@ -54,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sizeStr = (estimatedBytes / 1024).toFixed(1) + " KB";
     }
 
-    gifEstimate.textContent = `Est. max size: ~${sizeStr}${maxW === 0 ? " (at 1080p)" : ""}`;
+    gifEstimate.textContent = `Est. max size: ~${sizeStr}`;
     gifWarning.style.display = estimatedBytes >= 500 * 1024 * 1024 ? "block" : "none";
   };
 
@@ -103,7 +105,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const duration = data.gifMaxDuration ?? 30;
         gifMaxDuration.value = duration;
         durationValue.textContent = `${duration}s`;
-        gifMaxWidth.value = String(data.gifMaxWidth ?? 0);
+        const storedWidth = data.gifMaxWidth ?? 720;
+        const widthIndex = gifWidthValues.indexOf(storedWidth);
+        gifMaxWidth.value = widthIndex !== -1 ? widthIndex : 1;
+        gifMaxWidthValue.textContent = `${gifWidthValues[gifMaxWidth.value]}px`;
 
         toggleFormatOption();
         validateOutputOptions();
@@ -158,9 +163,12 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.storage.sync.set({ gifMaxDuration: parseInt(gifMaxDuration.value, 10) });
   });
 
-  gifMaxWidth.addEventListener("change", () => {
-    chrome.storage.sync.set({ gifMaxWidth: parseInt(gifMaxWidth.value, 10) });
+  gifMaxWidth.addEventListener("input", () => {
+    gifMaxWidthValue.textContent = `${gifWidthValues[parseInt(gifMaxWidth.value, 10)]}px`;
     updateGifEstimate();
+  });
+  gifMaxWidth.addEventListener("change", () => {
+    chrome.storage.sync.set({ gifMaxWidth: gifWidthValues[parseInt(gifMaxWidth.value, 10)] });
   });
 
   // Display the extension version in the popup

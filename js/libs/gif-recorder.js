@@ -15,6 +15,9 @@ class GIFRecorder {
     this.height = 0;
     this.chunks = [];
     this.maxDuration = 30; // Default max recording duration in seconds
+    this.framerate = 10; // Default framerate in fps
+    this.maxWidth = 0; // 0 = source resolution
+    this.frameInterval = 100; // ms between frames (derived from framerate)
 
     chrome.runtime.onMessage.addListener((msg) => {
       switch (msg.type) {
@@ -46,27 +49,39 @@ class GIFRecorder {
     this.frameCount = 0;
     this.startTime = Date.now();
     this.autoStopVideo = video;
-    
-    // We previously scaled down to 640px to avoid hitting limits, 
-    // but with chunking, we can allow full resolution (or up to 720p for memory safety)
-    const MAX_WIDTH = 1280; 
-    const scale = Math.min(1, MAX_WIDTH / video.videoWidth);
-    this.width = Math.floor(video.videoWidth * scale);
-    this.height = Math.floor(video.videoHeight * scale);
 
-    this.canvas = document.createElement("canvas");
-    this.canvas.width = this.width;
-    this.canvas.height = this.height;
-    this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
+    // Load GIF settings from storage, then begin capture
+    chrome.storage.sync.get(
+      ["gifFramerate", "gifMaxDuration", "gifMaxWidth"],
+      (data) => {
+        if (!this.recording) return; // cancelled before storage returned
 
-    try {
-      this.captureFrame(video);
-      return this.recording;
-    } catch (error) {
-      console.error("Error starting recording:", error);
-      this.recording = false;
-      return false;
-    }
+        this.framerate = data.gifFramerate || 10;
+        this.maxDuration = data.gifMaxDuration || 30;
+        this.maxWidth = data.gifMaxWidth || 0; // 0 = source
+        this.frameInterval = Math.round(1000 / this.framerate);
+
+        // Determine max width: 0 means source, otherwise cap at configured value
+        const effectiveMaxWidth = this.maxWidth > 0 ? this.maxWidth : video.videoWidth;
+        const scale = Math.min(1, effectiveMaxWidth / video.videoWidth);
+        this.width = Math.floor(video.videoWidth * scale);
+        this.height = Math.floor(video.videoHeight * scale);
+
+        this.canvas = document.createElement("canvas");
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+        this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
+
+        try {
+          this.captureFrame(video);
+        } catch (error) {
+          console.error("Error starting recording:", error);
+          this.recording = false;
+        }
+      }
+    );
+
+    return true;
   }
 
   stopRecording() {
@@ -115,7 +130,7 @@ class GIFRecorder {
       }
     }
 
-    setTimeout(() => this.captureFrame(video), 100);
+    setTimeout(() => this.captureFrame(video), this.frameInterval);
   }
 
   async sendToOffscreen(videoTitle, formattedTime) {
@@ -148,6 +163,7 @@ class GIFRecorder {
         type: "gif-render",
         videoTitle,
         formattedTime,
+        frameDelay: this.frameInterval,
         tabId,
       });
 

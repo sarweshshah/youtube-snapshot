@@ -20,7 +20,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     case "gif-render":
       currentTabId = msg.tabId;
-      renderGIF(msg.videoTitle, msg.formattedTime);
+      renderGIF(msg.videoTitle, msg.formattedTime, msg.frameDelay || 100);
       sendResponse({ ok: true });
       break;
 
@@ -44,7 +44,7 @@ function sendToTab(message) {
   chrome.runtime.sendMessage({ ...message, tabId: currentTabId });
 }
 
-function renderGIF(videoTitle, formattedTime) {
+function renderGIF(videoTitle, formattedTime, frameDelay) {
   try {
     currentGif = new GIF({
       workers: 2,
@@ -55,7 +55,7 @@ function renderGIF(videoTitle, formattedTime) {
     });
 
     for (const imageData of frames) {
-      currentGif.addFrame(imageData, { delay: 100 });
+      currentGif.addFrame(imageData, { delay: frameDelay });
     }
 
     currentGif.on("progress", (p) => {

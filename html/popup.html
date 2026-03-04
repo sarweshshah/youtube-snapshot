@@ -6,13 +6,12 @@
     <meta name="color-scheme" content="light dark" />
     <title>YouTube Snapshot Settings</title>
     <link rel="stylesheet" href="../css/popup.css" />
-    <!-- Link to external CSS file -->
   </head>
 
   <body>
     <h1>Snapshot Settings</h1>
 
-    <!-- Grouped File Options -->
+    <!-- Snapshot Output -->
     <div class="section">
       <div class="section-title">Snapshot Output</div>
       <div class="setting" style="margin-bottom: 8px">
@@ -30,19 +29,57 @@
           <option value="jpg">JPG</option>
         </select>
       </div>
+      <div class="setting" id="qualitySetting" style="display: none">
+        <label for="qualitySlider">JPG Quality</label>
+        <div class="slider-group">
+          <input type="range" id="qualitySlider" min="10" max="100" step="5" value="92" />
+          <span id="qualityValue" class="slider-value">92%</span>
+        </div>
+      </div>
       <div id="outputWarning" class="warning-text" style="display: none">
         Enable at least one output option
       </div>
     </div>
 
+    <!-- GIF Settings -->
     <div class="section">
-      <div class="section-title">Audio</div>
+      <div class="section-title">GIF</div>
+      <div class="setting" style="margin-bottom: 8px">
+        <label for="gifFramerate">Framerate</label>
+        <select id="gifFramerate">
+          <option value="5">5 fps</option>
+          <option value="10" selected>10 fps</option>
+          <option value="15">15 fps</option>
+          <option value="24">24 fps</option>
+        </select>
+      </div>
+      <div class="setting" style="margin-bottom: 8px">
+        <label for="gifMaxDuration">Max Duration</label>
+        <div class="slider-group">
+          <input type="range" id="gifMaxDuration" min="5" max="60" step="5" value="30" />
+          <span id="durationValue" class="slider-value">30s</span>
+        </div>
+      </div>
+      <div class="setting">
+        <label for="gifMaxWidth">Max Width</label>
+        <select id="gifMaxWidth">
+          <option value="480">480px</option>
+          <option value="720">720px</option>
+          <option value="0" selected>Source</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Audio -->
+    <div class="section">
+      <div class="section-title">General</div>
       <div class="setting">
         <label for="soundOption">Disable Sound</label>
         <input type="checkbox" id="soundOption" />
       </div>
     </div>
 
+    <!-- Keyboard Shortcuts -->
     <div class="section">
       <div class="section-title">Keyboard Shortcuts</div>
       <div class="setting" style="margin-bottom: 8px">

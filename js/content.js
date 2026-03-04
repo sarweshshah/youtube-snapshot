@@ -480,7 +480,7 @@ function takeSnapshot(video) {
   const sanitizedTitle = videoTitle.trim();
 
   chrome.storage.sync.get(
-    ["fileFormat", "saveAsFile", "saveToClipboard", "playSound"],
+    ["fileFormat", "jpgQuality", "saveAsFile", "saveToClipboard", "playSound"],
     (data) => {
       if (!data.saveAsFile && !data.saveToClipboard) {
         showNotification(
@@ -493,6 +493,7 @@ function takeSnapshot(video) {
       const format = data.fileFormat || "png";
       const mimeType = format === "jpg" ? "image/jpeg" : "image/png";
       const extension = format === "jpg" ? "jpg" : "png";
+      const jpgQuality = (data.jpgQuality ?? 92) / 100; // Convert percentage to 0-1
 
       // Generate a dynamic filename with the chosen extension
       const filename = `${sanitizedTitle} [${formattedTime}].${extension}`;
@@ -504,8 +505,10 @@ function takeSnapshot(video) {
       const ctx = canvas.getContext("2d");
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Convert canvas to image in the selected format
-      const dataURL = canvas.toDataURL(mimeType);
+      // Convert canvas to image in the selected format (pass quality for JPG)
+      const dataURL = format === "jpg"
+        ? canvas.toDataURL(mimeType, jpgQuality)
+        : canvas.toDataURL(mimeType);
 
       // Handle save-to-file and clipboard options
       if (data.saveAsFile) {

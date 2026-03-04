@@ -12,6 +12,9 @@
     --kbd-bg: #eaeaea;
     --kbd-border: #aaa;
     --accent: #007BFF;
+    --checkbox-border: #ababab;
+    --checkbox-checked-bg: #dadada;
+    --checkbox-tick: #1a1a1a;
 
     --transition-fast: 0.15s ease-out;
     --radius: 6px;
@@ -32,6 +35,9 @@
         --input-disabled-bg: #222;
         --kbd-bg: #333;
         --kbd-border: #555;
+        --checkbox-border: #515151;
+        --checkbox-checked-bg: #353535;
+        --checkbox-tick: #d6d6d6;
     }
 }
 
@@ -108,7 +114,7 @@ h1 {
     appearance: none;
     width: 12px;
     height: 12px;
-    border: var(--border-weight) solid var(--border-color);
+    border: var(--border-weight) solid var(--checkbox-border);
     border-radius: 2px;
     background: var(--input-bg);
     cursor: pointer;
@@ -118,8 +124,8 @@ h1 {
 }
 
 .setting input[type="checkbox"]:checked {
-    background-color: var(--accent);
-    border-color: var(--accent);
+    background-color: var(--checkbox-checked-bg);
+    border-color: var(--checkbox-checked-bg);
 }
 
 .setting input[type="checkbox"]:checked::after {
@@ -129,7 +135,7 @@ h1 {
     left: 3px;
     width: 3px;
     height: 5.5px;
-    border: solid #fff;
+    border: solid var(--checkbox-tick);
     border-width: 0 1.5px 1.5px 0;
     transform: rotate(45deg);
 }

@@ -4,12 +4,16 @@ let currentShortcutKey = "s"; // Default shortcut key
 let gifRecorder = new GIFRecorder(); // Initialize GIF recorder
 let currentNotification = null;
 
-// Track the most recently interacted-with player for keyboard shortcuts (FR-04)
+// Track the most recently interacted-with player for keyboard shortcuts
 let activePlayer = null;
 
 // Debounce: prevent rapid snapshot presses (300ms cooldown)
 let lastSnapshotTime = 0;
 const SNAPSHOT_DEBOUNCE_MS = 300;
+
+// Recording indicator overlay state
+let recordingIndicator = null;
+let recordingTimerInterval = null;
 
 // --- Ad detection: check if an ad is currently playing ---
 function isAdPlaying(video) {
@@ -47,7 +51,7 @@ function isBlackFrame(canvas) {
   return true;
 }
 
-// --- FR-12: White flash overlay on snapshot capture ---
+// --- White flash overlay on snapshot capture ---
 function flashOverlay(video) {
   // Respect prefers-reduced-motion
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -87,6 +91,148 @@ function flashOverlay(video) {
   });
 }
 
+// --- Red pulsing dot + elapsed timer overlay on the player during GIF recording ---
+function injectRecordingStyles() {
+  if (document.getElementById("yt-snapshot-recording-styles")) return;
+  const style = document.createElement("style");
+  style.id = "yt-snapshot-recording-styles";
+  style.textContent = `
+    @keyframes yt-snapshot-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    @keyframes yt-snapshot-slide-in {
+      from { transform: translateX(100%); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+    @keyframes yt-snapshot-slide-out {
+      from { transform: translateX(0);    opacity: 1; }
+      to   { transform: translateX(100%); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function showRecordingIndicator(video) {
+  // Remove any existing indicator immediately (no animation)
+  removeRecordingIndicator(true);
+
+  const player = video.closest(".html5-video-player") || video.parentElement;
+  if (!player) return;
+
+  // Ensure parent is positioned and clips overflow for the slide effect
+  if (getComputedStyle(player).position === "static") {
+    player.style.position = "relative";
+  }
+
+  injectRecordingStyles();
+
+  // Pill-shaped badge anchored to the top-right of the player
+  const indicator = document.createElement("div");
+  indicator.id = "yt-snapshot-recording-indicator";
+  Object.assign(indicator.style, {
+    position: "absolute",
+    top: "12px",
+    right: "12px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    borderRadius: "20px",
+    padding: "6px 12px 6px 10px",
+    zIndex: "2147483647",
+    pointerEvents: "none",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.5)",
+    animation: "yt-snapshot-slide-in 0.3s ease-out forwards",
+  });
+
+  // Red pulsing dot
+  const dot = document.createElement("div");
+  dot.className = "yt-snapshot-rec-dot";
+  Object.assign(dot.style, {
+    width: "12px",
+    height: "12px",
+    borderRadius: "50%",
+    backgroundColor: "#ff0000",
+    flexShrink: "0",
+    animation: "yt-snapshot-pulse 1.5s ease-in-out infinite",
+  });
+
+  // Elapsed time counter
+  const timer = document.createElement("span");
+  timer.className = "yt-snapshot-rec-timer";
+  Object.assign(timer.style, {
+    color: "#ffffff",
+    fontSize: "13px",
+    fontWeight: "600",
+    fontVariantNumeric: "tabular-nums",
+    letterSpacing: "0.5px",
+    lineHeight: "1",
+  });
+  timer.textContent = "00:00";
+
+  indicator.appendChild(dot);
+  indicator.appendChild(timer);
+  player.appendChild(indicator);
+
+  recordingIndicator = indicator;
+
+  // Update timer every 500ms for responsive display
+  const recStartTime = gifRecorder.startTime;
+  recordingTimerInterval = setInterval(() => {
+    if (!gifRecorder.isRecording()) {
+      removeRecordingIndicator();
+      return;
+    }
+
+    // Update elapsed time
+    const elapsed = Math.floor((Date.now() - recStartTime) / 1000);
+    const minutes = String(Math.floor(elapsed / 60)).padStart(2, "0");
+    const seconds = String(elapsed % 60).padStart(2, "0");
+    const timerEl = indicator.querySelector(".yt-snapshot-rec-timer");
+    if (timerEl) {
+      timerEl.textContent = `${minutes}:${seconds}`;
+    }
+
+    // When video is paused, stop the pulsing and dim the dot
+    const dotEl = indicator.querySelector(".yt-snapshot-rec-dot");
+    if (dotEl) {
+      if (video.paused) {
+        dotEl.style.animation = "none";
+        dotEl.style.opacity = "0.5";
+      } else {
+        dotEl.style.animation = "yt-snapshot-pulse 1.5s ease-in-out infinite";
+        dotEl.style.opacity = "";
+      }
+    }
+  }, 500);
+}
+
+function removeRecordingIndicator(immediate) {
+  if (recordingTimerInterval) {
+    clearInterval(recordingTimerInterval);
+    recordingTimerInterval = null;
+  }
+  if (recordingIndicator) {
+    const el = recordingIndicator;
+    recordingIndicator = null;
+
+    if (immediate) {
+      el.remove();
+    } else {
+      // Slide out to the right before removing
+      el.style.animation = "yt-snapshot-slide-out 0.3s ease-in forwards";
+      el.addEventListener("animationend", () => el.remove(), { once: true });
+      // Safety fallback in case animationend doesn't fire
+      setTimeout(() => {
+        if (el.parentNode) el.remove();
+      }, 400);
+    }
+  }
+}
+
 // Inject the snapshot buttons immediately when the script loads
 injectButtons();
 
@@ -97,8 +243,8 @@ window.onload = function () {
   observePage(); // Start observing for dynamic content changes
   injectButtons(); // Inject buttons into all players on the page
   setupKeyboardShortcut(); // Set up dynamic keypress functionality
-  setupFullscreenListener(); // Re-inject buttons on fullscreen changes (FR-05)
-  setupSPANavigationListener(); // Handle YouTube SPA navigation (FR-05)
+  setupFullscreenListener(); // Re-inject buttons on fullscreen changes
+  setupSPANavigationListener(); // Handle YouTube SPA navigation
 };
 
 // Load user settings or apply default settings
@@ -126,7 +272,7 @@ function loadUserSettings() {
       currentShortcutKey = data.shortcutKey || currentShortcutKey;
       // Default file format is PNG
       chrome.storage.sync.set({ fileFormat: data.fileFormat || "png" });
-    }
+    },
   );
 }
 
@@ -160,7 +306,7 @@ function isEventFromEditable(event) {
   // If inside input, textarea, select, or any contenteditable container, treat as editable
   if (typeof target.closest === "function") {
     const editableContainer = target.closest(
-      'input, textarea, select, [contenteditable=""], [contenteditable="true"]'
+      'input, textarea, select, [contenteditable=""], [contenteditable="true"]',
     );
     if (editableContainer) return true;
   }
@@ -172,19 +318,19 @@ function isEventFromEditable(event) {
   return false;
 }
 
-// --- FR-04: Find the <video> element associated with a given player container ---
+// Find the <video> element associated with a given player container
 function getVideoForPlayer(playerEl) {
   if (!playerEl) return null;
   return playerEl.querySelector("video");
 }
 
-// --- FR-04: Find the player container (.html5-video-player) for a given element ---
+// Find the player container (.html5-video-player) for a given element
 function getPlayerContainer(el) {
   if (!el) return null;
   return el.closest(".html5-video-player");
 }
 
-// --- FR-04: Set the active player when the user interacts with any player ---
+// Set the active player when the user interacts with any player
 function trackActivePlayer(event) {
   const player = getPlayerContainer(event.target);
   if (player) {
@@ -192,7 +338,7 @@ function trackActivePlayer(event) {
   }
 }
 
-// --- FR-04: Resolve which video to use for keyboard shortcuts ---
+// Resolve which video to use for keyboard shortcuts
 // Priority: active (last interacted) → currently playing → first on page
 function resolveActiveVideo() {
   // 1. Last interacted player
@@ -211,7 +357,7 @@ function resolveActiveVideo() {
   return videos[0] || null;
 }
 
-// --- FR-04: Inject snapshot button into ALL players on the page ---
+// Inject snapshot button into ALL players on the page
 function injectButtons() {
   const allControls = document.querySelectorAll(".ytp-right-controls");
 
@@ -273,7 +419,7 @@ function injectButtons() {
   }
 }
 
-// --- FR-05: Re-inject buttons when fullscreen state changes ---
+// Re-inject buttons when fullscreen state changes
 function setupFullscreenListener() {
   document.addEventListener("fullscreenchange", () => {
     // Short delay to let YouTube update its DOM after fullscreen toggle
@@ -281,7 +427,7 @@ function setupFullscreenListener() {
   });
 }
 
-// --- FR-05: Handle YouTube SPA navigation ---
+// Handle YouTube SPA navigation
 function setupSPANavigationListener() {
   // YouTube fires this custom event on client-side navigation
   document.addEventListener("yt-navigate-finish", () => {
@@ -291,6 +437,7 @@ function setupSPANavigationListener() {
     // Cancel any in-progress GIF recording
     if (gifRecorder.isRecording()) {
       removeVideoPauseListeners();
+      removeRecordingIndicator();
       gifRecorder.cancelRecording();
     }
 
@@ -359,11 +506,13 @@ function handleGifRecording(video) {
   if (!gifRecorder.isRecording()) {
     if (gifRecorder.startRecording(video)) {
       showNotification("GIF recording started", "info");
+      showRecordingIndicator(video);
 
       // Listen for auto-stop and process the GIF
       const onAutoStop = () => {
         document.removeEventListener("gifAutoStopped", onAutoStop);
         removeVideoPauseListeners();
+        removeRecordingIndicator();
         showGifProcessingUI();
       };
       document.addEventListener("gifAutoStopped", onAutoStop);
@@ -392,6 +541,7 @@ function handleGifRecording(video) {
     }
   } else {
     removeVideoPauseListeners();
+    removeRecordingIndicator();
     gifRecorder.stopRecording();
     showGifProcessingUI();
   }
@@ -428,6 +578,7 @@ function showGifProcessingUI() {
 
   cancelButton.onclick = () => {
     removeVideoPauseListeners();
+    removeRecordingIndicator();
     gifRecorder.cancelRecording();
     cleanup();
     progressBox.remove();
@@ -441,7 +592,7 @@ function showGifProcessingUI() {
     if (currentNotification === progressBox) {
       const tempButton = progressBox.querySelector("button");
       progressBox.textContent = `Processing GIF... ${String(
-        Math.round(e.detail * 100)
+        Math.round(e.detail * 100),
       ).padStart(2, "0")}%`;
       progressBox.appendChild(tempButton);
     }
@@ -582,7 +733,7 @@ function takeSnapshot(video) {
       if (!data.saveAsFile && !data.saveToClipboard) {
         showNotification(
           "No output enabled — check extension settings",
-          "error"
+          "error",
         );
         return;
       }
@@ -606,18 +757,19 @@ function takeSnapshot(video) {
       if (isBlackFrame(canvas)) {
         showNotification(
           "This video is protected and cannot be captured",
-          "error"
+          "error",
         );
         return;
       }
 
-      // FR-12: White flash overlay
+      // White flash overlay
       flashOverlay(video);
 
       // Convert canvas to image in the selected format (pass quality for JPG)
-      const dataURL = format === "jpg"
-        ? canvas.toDataURL(mimeType, jpgQuality)
-        : canvas.toDataURL(mimeType);
+      const dataURL =
+        format === "jpg"
+          ? canvas.toDataURL(mimeType, jpgQuality)
+          : canvas.toDataURL(mimeType);
 
       // Handle save-to-file and clipboard options
       if (data.saveAsFile) {
@@ -636,13 +788,13 @@ function takeSnapshot(video) {
       if (data.playSound !== false) {
         // Default to true
         const audio = new Audio(
-          chrome.runtime.getURL("audio/download-sound.mp3")
+          chrome.runtime.getURL("audio/download-sound.mp3"),
         );
         audio
           .play()
           .catch((error) => console.error("Error playing sound:", error));
       }
-    }
+    },
   );
 }
 

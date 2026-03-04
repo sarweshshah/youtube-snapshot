@@ -18,11 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const durationValue = document.getElementById("durationValue");
   const gifMaxWidth = document.getElementById("gifMaxWidth");
   const gifEstimate = document.getElementById("gifEstimate");
+  const gifWarning = document.getElementById("gifWarning");
 
   // Show or hide file format option based on "Save as File" checkbox state
   const toggleFormatOption = () => {
     formatSetting.style.display = fileOption.checked ? "flex" : "none";
-    formatSetting.style.marginTop = fileOption.checked ? "8px" : "0px";
     toggleQualityOption();
   };
 
@@ -30,7 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const toggleQualityOption = () => {
     const showQuality = fileOption.checked && formatOption.value === "jpg";
     qualitySetting.style.display = showQuality ? "flex" : "none";
-    qualitySetting.style.marginTop = showQuality ? "8px" : "0px";
   };
 
   const updateGifEstimate = () => {
@@ -56,6 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     gifEstimate.textContent = `Est. max size: ~${sizeStr}${maxW === 0 ? " (at 1080p)" : ""}`;
+    gifWarning.style.display = estimatedBytes >= 500 * 1024 * 1024 ? "block" : "none";
   };
 
   const validateOutputOptions = () => {

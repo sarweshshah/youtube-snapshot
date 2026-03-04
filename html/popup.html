@@ -13,8 +13,8 @@
 
     <!-- Snapshot Output -->
     <div class="section">
-      <div class="section-title">Snapshot Output</div>
-      <div class="setting" style="margin-bottom: 8px">
+      <div class="section-title">Snapshot</div>
+      <div class="setting">
         <label for="clipboardOption">Save to Clipboard</label>
         <input type="checkbox" id="clipboardOption" />
       </div>
@@ -36,7 +36,7 @@
           <span id="qualityValue" class="slider-value">92%</span>
         </div>
       </div>
-      <div id="outputWarning" class="warning-text" style="display: none">
+      <div id="outputWarning" class="warning-text warning-text--error" style="display: none">
         Enable at least one output option
       </div>
     </div>
@@ -44,14 +44,14 @@
     <!-- GIF Settings -->
     <div class="section">
       <div class="section-title">GIF</div>
-      <div class="setting" style="margin-bottom: 8px">
+      <div class="setting">
         <label for="gifFramerate">Framerate</label>
         <div class="slider-group">
           <input type="range" id="gifFramerate" min="5" max="20" step="1" value="10" />
           <span id="framerateValue" class="slider-value">10 fps</span>
         </div>
       </div>
-      <div class="setting" style="margin-bottom: 8px">
+      <div class="setting">
         <label for="gifMaxDuration">Max Duration</label>
         <div class="slider-group">
           <input type="range" id="gifMaxDuration" min="5" max="60" step="5" value="30" />
@@ -59,7 +59,7 @@
         </div>
       </div>
       <div class="setting">
-        <label for="gifMaxWidth">Max Width</label>
+        <label for="gifMaxWidth">Frame Width</label>
         <select id="gifMaxWidth">
           <option value="480">480px</option>
           <option value="720">720px</option>
@@ -67,9 +67,12 @@
         </select>
       </div>
       <div id="gifEstimate" class="estimate-text"></div>
+      <div id="gifWarning" class="warning-text warning-text--caution" style="display: none">
+        Processing may be slow at this size
+      </div>
     </div>
 
-    <!-- Audio -->
+    <!-- General -->
     <div class="section">
       <div class="section-title">General</div>
       <div class="setting">
@@ -81,7 +84,7 @@
     <!-- Keyboard Shortcuts -->
     <div class="section">
       <div class="section-title">Keyboard Shortcuts</div>
-      <div class="setting" style="margin-bottom: 8px">
+      <div class="setting">
         <span class="info-text"
           >Press <kbd>s</kbd> to take a snapshot</span
         >
@@ -93,7 +96,7 @@
       </div>
     </div>
 
-    <footer>YouTube Snapshot Extension v<span id="version"></span></footer>
+    <footer>YouTube Snapshot v<span id="version"></span></footer>
 
     <script src="../js/popup.js"></script>
   </body>

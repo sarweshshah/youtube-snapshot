@@ -4,33 +4,6 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log("YouTube Snapshot Extension installed!");
 });
 
-// --- Iframe script injection ---
-
-if (chrome.webNavigation && chrome.webNavigation.onCompleted) {
-  chrome.webNavigation.onCompleted.addListener(
-    (details) => {
-      if (details.frameId !== 0 && details.url.includes("youtube.com/embed")) {
-        setTimeout(() => {
-          chrome.scripting.executeScript({
-            target: {
-              tabId: details.tabId,
-              frameIds: [details.frameId],
-            },
-            files: ["js/content.js"],
-          });
-        }, 500);
-      }
-    },
-    {
-      url: [{ urlContains: "youtube.com/embed" }],
-    },
-  );
-} else {
-  console.warn(
-    "chrome.webNavigation API is unavailable. Ensure 'webNavigation' permission is set in manifest.json.",
-  );
-}
-
 // --- Offscreen document management ---
 
 async function ensureOffscreenDocument() {

@@ -3,8 +3,11 @@
   "name": "YouTube Snapshot",
   "version": "1.4.0",
   "description": "Take snapshots of YouTube videos and save to clipboard or file.",
-  "permissions": ["storage", "webNavigation", "scripting", "offscreen"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": ["storage", "offscreen", "activeTab"],
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "*://*.youtube-nocookie.com/*"
+  ],
   "background": {
     "service_worker": "js/background.js"
   },
@@ -15,7 +18,8 @@
     {
       "matches": ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"],
       "js": ["js/libs/gif-recorder.js", "js/content.js"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true
     }
   ],
   "icons": {
@@ -26,7 +30,7 @@
   "web_accessible_resources": [
     {
       "resources": ["icons/snapshot-icon.png", "audio/download-sound.mp3"],
-      "matches": ["<all_urls>"]
+      "matches": ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"]
     }
   ]
 }

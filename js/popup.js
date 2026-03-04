@@ -13,9 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const soundOption = document.getElementById("soundOption");
   const outputWarning = document.getElementById("outputWarning");
   const gifFramerate = document.getElementById("gifFramerate");
+  const framerateValue = document.getElementById("framerateValue");
   const gifMaxDuration = document.getElementById("gifMaxDuration");
   const durationValue = document.getElementById("durationValue");
   const gifMaxWidth = document.getElementById("gifMaxWidth");
+  const gifEstimate = document.getElementById("gifEstimate");
 
   // Show or hide file format option based on "Save as File" checkbox state
   const toggleFormatOption = () => {
@@ -29,6 +31,31 @@ document.addEventListener("DOMContentLoaded", () => {
     const showQuality = fileOption.checked && formatOption.value === "jpg";
     qualitySetting.style.display = showQuality ? "flex" : "none";
     qualitySetting.style.marginTop = showQuality ? "8px" : "0px";
+  };
+
+  const updateGifEstimate = () => {
+    const fps = parseInt(gifFramerate.value, 10);
+    const duration = parseInt(gifMaxDuration.value, 10);
+    const maxW = parseInt(gifMaxWidth.value, 10);
+
+    // Assume 16:9 aspect ratio
+    const width = maxW > 0 ? maxW : 1920;
+    const height = Math.round(width * 9 / 16);
+    const totalFrames = fps * duration;
+
+    // ~0.5 bytes per pixel per frame is a reasonable GIF compression estimate
+    const estimatedBytes = totalFrames * width * height * 0.5;
+
+    let sizeStr;
+    if (estimatedBytes >= 1024 * 1024 * 1024) {
+      sizeStr = (estimatedBytes / (1024 * 1024 * 1024)).toFixed(1) + " GB";
+    } else if (estimatedBytes >= 1024 * 1024) {
+      sizeStr = (estimatedBytes / (1024 * 1024)).toFixed(1) + " MB";
+    } else {
+      sizeStr = (estimatedBytes / 1024).toFixed(1) + " KB";
+    }
+
+    gifEstimate.textContent = `Est. max size: ~${sizeStr}${maxW === 0 ? " (at 1080p)" : ""}`;
   };
 
   const validateOutputOptions = () => {
@@ -70,7 +97,9 @@ document.addEventListener("DOMContentLoaded", () => {
         qualityValue.textContent = `${quality}%`;
 
         // GIF settings
-        gifFramerate.value = String(data.gifFramerate ?? 10);
+        const framerate = data.gifFramerate ?? 10;
+        gifFramerate.value = framerate;
+        framerateValue.textContent = `${framerate} fps`;
         const duration = data.gifMaxDuration ?? 30;
         gifMaxDuration.value = duration;
         durationValue.textContent = `${duration}s`;
@@ -78,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         toggleFormatOption();
         validateOutputOptions();
+        updateGifEstimate();
       }
     );
   } catch (error) {
@@ -112,12 +142,17 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.storage.sync.set({ playSound: !soundOption.checked });
   });
 
+  gifFramerate.addEventListener("input", () => {
+    framerateValue.textContent = `${gifFramerate.value} fps`;
+    updateGifEstimate();
+  });
   gifFramerate.addEventListener("change", () => {
     chrome.storage.sync.set({ gifFramerate: parseInt(gifFramerate.value, 10) });
   });
 
   gifMaxDuration.addEventListener("input", () => {
     durationValue.textContent = `${gifMaxDuration.value}s`;
+    updateGifEstimate();
   });
   gifMaxDuration.addEventListener("change", () => {
     chrome.storage.sync.set({ gifMaxDuration: parseInt(gifMaxDuration.value, 10) });
@@ -125,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   gifMaxWidth.addEventListener("change", () => {
     chrome.storage.sync.set({ gifMaxWidth: parseInt(gifMaxWidth.value, 10) });
+    updateGifEstimate();
   });
 
   // Display the extension version in the popup

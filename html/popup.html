@@ -46,12 +46,10 @@
       <div class="section-title">GIF</div>
       <div class="setting" style="margin-bottom: 8px">
         <label for="gifFramerate">Framerate</label>
-        <select id="gifFramerate">
-          <option value="5">5 fps</option>
-          <option value="10" selected>10 fps</option>
-          <option value="15">15 fps</option>
-          <option value="24">24 fps</option>
-        </select>
+        <div class="slider-group">
+          <input type="range" id="gifFramerate" min="5" max="20" step="1" value="10" />
+          <span id="framerateValue" class="slider-value">10 fps</span>
+        </div>
       </div>
       <div class="setting" style="margin-bottom: 8px">
         <label for="gifMaxDuration">Max Duration</label>
@@ -68,6 +66,7 @@
           <option value="0" selected>Source</option>
         </select>
       </div>
+      <div id="gifEstimate" class="estimate-text"></div>
     </div>
 
     <!-- Audio -->

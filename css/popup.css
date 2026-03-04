@@ -130,6 +130,7 @@ h1 {
     color: var(--text-secondary);
     min-width: 36px;
     text-align: right;
+    white-space: nowrap;
 }
 
 .setting input[type="range"] {
@@ -218,6 +219,13 @@ footer {
     background-color: rgba(231, 76, 60, 0.1);
     border-radius: var(--border-radius-small);
     width: 100%;
+}
+
+.estimate-text {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 10px;
+    text-align: right;
 }
 
 kbd {

@@ -4,16 +4,21 @@ let currentShortcutKey = "s"; // Default shortcut key
 let gifRecorder = new GIFRecorder(); // Initialize GIF recorder
 let currentNotification = null;
 
-// Inject the snapshot button immediately when the script loads
-injectButton();
+// Track the most recently interacted-with player for keyboard shortcuts (FR-04)
+let activePlayer = null;
+
+// Inject the snapshot buttons immediately when the script loads
+injectButtons();
 
 // On window load, initialize user settings, observers, and keyboard shortcuts
 window.onload = function () {
   console.log("Window loaded, initializing...");
   loadUserSettings(); // Load initial user settings
   observePage(); // Start observing for dynamic content changes
-  injectButton(); // Inject the button initially when the page loads
+  injectButtons(); // Inject buttons into all players on the page
   setupKeyboardShortcut(); // Set up dynamic keypress functionality
+  setupFullscreenListener(); // Re-inject buttons on fullscreen changes (FR-05)
+  setupSPANavigationListener(); // Handle YouTube SPA navigation (FR-05)
 };
 
 // Load user settings or apply default settings
@@ -52,7 +57,7 @@ const observer = new MutationObserver((mutations) => {
       (mutation.type === "childList" || mutation.type === "attributes") &&
       document.querySelector(".ytp-right-controls")
     ) {
-      injectButton(); // Re-inject the button if controls change
+      injectButtons(); // Re-inject buttons if controls change
     }
   }
 });
@@ -87,48 +92,131 @@ function isEventFromEditable(event) {
   return false;
 }
 
-// Inject the snapshot button into YouTube player controls
-function injectButton() {
-  const controls = document.querySelector(".ytp-right-controls");
+// --- FR-04: Find the <video> element associated with a given player container ---
+function getVideoForPlayer(playerEl) {
+  if (!playerEl) return null;
+  return playerEl.querySelector("video");
+}
 
-  // Avoid duplicate buttons
-  if (!controls || document.getElementById("snapshotButton")) return;
+// --- FR-04: Find the player container (.html5-video-player) for a given element ---
+function getPlayerContainer(el) {
+  if (!el) return null;
+  return el.closest(".html5-video-player");
+}
 
-  // Create the snapshot button
-  const snapshotButton = document.createElement("button");
-  snapshotButton.id = "snapshotButton";
-  snapshotButton.title = "Take Snapshot (S) | Record GIF (G)";
-  snapshotButton.classList.add("ytp-button");
+// --- FR-04: Set the active player when the user interacts with any player ---
+function trackActivePlayer(event) {
+  const player = getPlayerContainer(event.target);
+  if (player) {
+    activePlayer = player;
+  }
+}
 
-  // Style the button for proper dimensions and visibility
-  Object.assign(snapshotButton.style, {
-    width: "auto",
-    height: "100%",
-    border: "none",
-    background: "transparent",
-    cursor: "pointer",
-    padding: "0 12px",
-    marginRight: "4px",
-    marginLeft: "4px",
+// --- FR-04: Resolve which video to use for keyboard shortcuts ---
+// Priority: active (last interacted) → currently playing → first on page
+function resolveActiveVideo() {
+  // 1. Last interacted player
+  if (activePlayer && activePlayer.isConnected) {
+    const video = getVideoForPlayer(activePlayer);
+    if (video) return video;
+  }
+
+  // 2. Currently playing video
+  const videos = document.querySelectorAll("video");
+  for (const v of videos) {
+    if (!v.paused) return v;
+  }
+
+  // 3. First video on the page
+  return videos[0] || null;
+}
+
+// --- FR-04: Inject snapshot button into ALL players on the page ---
+function injectButtons() {
+  const allControls = document.querySelectorAll(".ytp-right-controls");
+
+  for (const controls of allControls) {
+    // Skip if this control bar already has our button
+    if (controls.querySelector(".yt-snapshot-btn")) continue;
+
+    const playerContainer = getPlayerContainer(controls);
+
+    // Create the snapshot button
+    const snapshotButton = document.createElement("button");
+    snapshotButton.className = "yt-snapshot-btn";
+    snapshotButton.title = "Take Snapshot (S) | Record GIF (G)";
+    snapshotButton.classList.add("ytp-button");
+    snapshotButton.setAttribute("aria-label", "Take screenshot");
+
+    // Style the button for proper dimensions and visibility
+    Object.assign(snapshotButton.style, {
+      width: "auto",
+      height: "100%",
+      border: "none",
+      background: "transparent",
+      cursor: "pointer",
+      padding: "0 12px",
+      marginRight: "4px",
+      marginLeft: "4px",
+    });
+
+    // Create the img element for the button icon
+    const img = document.createElement("img");
+    img.src = chrome.runtime.getURL("icons/snapshot-icon.png");
+    Object.assign(img.style, {
+      width: "auto",
+      height: "50%",
+      display: "block",
+    });
+
+    // Insert the image inside the button
+    snapshotButton.appendChild(img);
+
+    // Insert the button into the YouTube controls
+    controls.insertBefore(snapshotButton, controls.firstChild);
+
+    // Click captures from THIS player's video
+    snapshotButton.addEventListener("click", () => {
+      const video = getVideoForPlayer(playerContainer);
+      if (video) {
+        activePlayer = playerContainer;
+        takeSnapshot(video);
+      }
+    });
+
+    // Track active player on interaction (click, hover, focus)
+    if (playerContainer) {
+      playerContainer.addEventListener("click", trackActivePlayer);
+      playerContainer.addEventListener("mouseover", trackActivePlayer);
+      playerContainer.addEventListener("focusin", trackActivePlayer);
+    }
+  }
+}
+
+// --- FR-05: Re-inject buttons when fullscreen state changes ---
+function setupFullscreenListener() {
+  document.addEventListener("fullscreenchange", () => {
+    // Short delay to let YouTube update its DOM after fullscreen toggle
+    setTimeout(injectButtons, 200);
   });
+}
 
-  // Create the img element for the button icon
-  const img = document.createElement("img");
-  img.src = chrome.runtime.getURL("icons/snapshot-icon.png"); // Updated image path
-  Object.assign(img.style, {
-    width: "auto",
-    height: "50%",
-    display: "block",
+// --- FR-05: Handle YouTube SPA navigation ---
+function setupSPANavigationListener() {
+  // YouTube fires this custom event on client-side navigation
+  document.addEventListener("yt-navigate-finish", () => {
+    // Reset active player since the page content changed
+    activePlayer = null;
+
+    // Cancel any in-progress GIF recording
+    if (gifRecorder.isRecording()) {
+      removeVideoPauseListeners();
+      gifRecorder.cancelRecording();
+    }
+
+    // Re-inject buttons into the new page
+    setTimeout(injectButtons, 300);
   });
-
-  // Insert the image inside the button
-  snapshotButton.appendChild(img);
-
-  // Insert the button into the YouTube controls
-  controls.insertBefore(snapshotButton, controls.firstChild);
-
-  // Add click event to capture video frame
-  snapshotButton.addEventListener("click", takeSnapshot);
 }
 
 // Set up dynamic keypress shortcut functionality
@@ -150,18 +238,19 @@ function setupKeyboardShortcut() {
 
       keypressListener = (event) => {
         if (isEventFromEditable(event)) return; // Ignore shortcuts while typing in editable fields
-        const ytvideo = document.querySelector("video");
-        if (!ytvideo) return;
+
+        const video = resolveActiveVideo();
+        if (!video) return;
 
         const pressedKey = event.key.toLowerCase();
 
         // Check snapshot shortcut first
         if (pressedKey === shortcutKey) {
-          takeSnapshot();
+          takeSnapshot(video);
         }
         // Only handle GIF shortcut if it doesn't conflict with snapshot shortcut
         else if (pressedKey === "g" && shortcutKey !== "g") {
-          handleGifRecording(ytvideo);
+          handleGifRecording(video);
         }
       };
       document.addEventListener("keypress", keypressListener);
@@ -376,16 +465,15 @@ function showNotification(message, type = "info", duration = 3000) {
   return alertBox;
 }
 
-// Function to capture the snapshot (shared by both button click and keyboard shortcut)
-function takeSnapshot() {
-  const ytvideo = document.querySelector("video");
-  if (!ytvideo) return;
+// Function to capture the snapshot from a specific video element
+function takeSnapshot(video) {
+  if (!video) return;
 
   // Fetch YouTube video title from <title> tag in <head>
   const videoTitle = getTitleFromHeadTag();
 
   // Get the current time of the video
-  const currentTime = ytvideo.currentTime;
+  const currentTime = video.currentTime;
   const formattedTime = formatTime(currentTime);
 
   // Sanitize the video title to make it filename-friendly
@@ -411,10 +499,10 @@ function takeSnapshot() {
 
       // Create a canvas and capture the current video frame
       const canvas = document.createElement("canvas");
-      canvas.width = ytvideo.videoWidth;
-      canvas.height = ytvideo.videoHeight;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
-      ctx.drawImage(ytvideo, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       // Convert canvas to image in the selected format
       const dataURL = canvas.toDataURL(mimeType);

@@ -7,6 +7,86 @@ let currentNotification = null;
 // Track the most recently interacted-with player for keyboard shortcuts (FR-04)
 let activePlayer = null;
 
+// Debounce: prevent rapid snapshot presses (300ms cooldown)
+let lastSnapshotTime = 0;
+const SNAPSHOT_DEBOUNCE_MS = 300;
+
+// --- Ad detection: check if an ad is currently playing ---
+function isAdPlaying(video) {
+  // YouTube adds .ad-showing to the player container during ads
+  const player = video.closest(".html5-video-player");
+  if (player && player.classList.contains("ad-showing")) return true;
+  // Also check for ad overlay elements
+  if (player && player.querySelector(".ytp-ad-player-overlay")) return true;
+  return false;
+}
+
+// --- DRM detection: check if canvas capture returned a black frame ---
+function isBlackFrame(canvas) {
+  const ctx = canvas.getContext("2d");
+  // Sample a grid of pixels across the frame
+  const w = canvas.width;
+  const h = canvas.height;
+  const samplePoints = [
+    [w * 0.25, h * 0.25],
+    [w * 0.5, h * 0.25],
+    [w * 0.75, h * 0.25],
+    [w * 0.25, h * 0.5],
+    [w * 0.5, h * 0.5],
+    [w * 0.75, h * 0.5],
+    [w * 0.25, h * 0.75],
+    [w * 0.5, h * 0.75],
+    [w * 0.75, h * 0.75],
+  ];
+
+  for (const [x, y] of samplePoints) {
+    const pixel = ctx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
+    // If any sampled pixel is non-black (R+G+B > 15), frame is valid
+    if (pixel[0] + pixel[1] + pixel[2] > 15) return false;
+  }
+  return true;
+}
+
+// --- FR-12: White flash overlay on snapshot capture ---
+function flashOverlay(video) {
+  // Respect prefers-reduced-motion
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const player = video.closest(".html5-video-player") || video.parentElement;
+  if (!player) return;
+
+  const flash = document.createElement("div");
+  Object.assign(flash.style, {
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "white",
+    opacity: "0",
+    pointerEvents: "none",
+    zIndex: "999",
+    transition: "opacity 100ms ease-out",
+  });
+
+  // Ensure parent is positioned so the overlay sits correctly
+  const parentPosition = getComputedStyle(player).position;
+  if (parentPosition === "static") {
+    player.style.position = "relative";
+  }
+
+  player.appendChild(flash);
+
+  // Animate: transparent → white → transparent
+  requestAnimationFrame(() => {
+    flash.style.opacity = "0.7";
+    setTimeout(() => {
+      flash.style.opacity = "0";
+      setTimeout(() => flash.remove(), 150);
+    }, 100);
+  });
+}
+
 // Inject the snapshot buttons immediately when the script loads
 injectButtons();
 
@@ -270,6 +350,12 @@ function setupKeyboardShortcut() {
 
 // Handle GIF recording logic (start/stop, show notifications, handle progress/cancel)
 function handleGifRecording(video) {
+  // Ad detection: block GIF capture during ads
+  if (isAdPlaying(video)) {
+    showNotification("Capture unavailable during ads", "info");
+    return;
+  }
+
   if (!gifRecorder.isRecording()) {
     if (gifRecorder.startRecording(video)) {
       showNotification("GIF recording started", "info");
@@ -469,6 +555,17 @@ function showNotification(message, type = "info", duration = 3000) {
 function takeSnapshot(video) {
   if (!video) return;
 
+  // Debounce: ignore rapid presses within 300ms
+  const now = Date.now();
+  if (now - lastSnapshotTime < SNAPSHOT_DEBOUNCE_MS) return;
+  lastSnapshotTime = now;
+
+  // Ad detection: block capture during ads
+  if (isAdPlaying(video)) {
+    showNotification("Capture unavailable during ads", "info");
+    return;
+  }
+
   // Fetch YouTube video title from <title> tag in <head>
   const videoTitle = getTitleFromHeadTag();
 
@@ -505,6 +602,18 @@ function takeSnapshot(video) {
       const ctx = canvas.getContext("2d");
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+      // DRM detection: check if the captured frame is entirely black
+      if (isBlackFrame(canvas)) {
+        showNotification(
+          "This video is protected and cannot be captured",
+          "error"
+        );
+        return;
+      }
+
+      // FR-12: White flash overlay
+      flashOverlay(video);
+
       // Convert canvas to image in the selected format (pass quality for JPG)
       const dataURL = format === "jpg"
         ? canvas.toDataURL(mimeType, jpgQuality)
@@ -525,7 +634,7 @@ function takeSnapshot(video) {
       }
 
       if (data.playSound !== false) {
-          // Default to true
+        // Default to true
         const audio = new Audio(
           chrome.runtime.getURL("audio/download-sound.mp3")
         );

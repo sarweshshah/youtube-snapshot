@@ -14,6 +14,7 @@ class GIFRecorder {
     this.width = 0;
     this.height = 0;
     this.chunks = [];
+    this.maxDuration = 30; // Default max recording duration in seconds
 
     chrome.runtime.onMessage.addListener((msg) => {
       switch (msg.type) {
@@ -44,6 +45,7 @@ class GIFRecorder {
     this.frames = [];
     this.frameCount = 0;
     this.startTime = Date.now();
+    this.autoStopVideo = video;
     
     // We previously scaled down to 640px to avoid hitting limits, 
     // but with chunking, we can allow full resolution (or up to 720p for memory safety)
@@ -91,17 +93,29 @@ class GIFRecorder {
   captureFrame(video) {
     if (!this.recording) return;
 
-    try {
-      this.ctx.drawImage(video, 0, 0, this.width, this.height);
-      const imageData = this.ctx.getImageData(0, 0, this.width, this.height);
-      this.frames.push(imageData.data);
-      this.frameCount++;
-
-      setTimeout(() => this.captureFrame(video), 100);
-    } catch (error) {
-      console.error("Error capturing frame:", error);
-      this.recording = false;
+    // Auto-stop if max duration reached
+    if (this.getDuration() >= this.maxDuration) {
+      document.dispatchEvent(new CustomEvent("gifAutoStopped"));
+      this.stopRecording();
+      return;
     }
+
+    // Skip frame capture while video is paused to avoid duplicate frames.
+    // Keep the timer running so recording resumes when playback resumes.
+    if (!video.paused) {
+      try {
+        this.ctx.drawImage(video, 0, 0, this.width, this.height);
+        const imageData = this.ctx.getImageData(0, 0, this.width, this.height);
+        this.frames.push(imageData.data);
+        this.frameCount++;
+      } catch (error) {
+        console.error("Error capturing frame:", error);
+        this.recording = false;
+        return;
+      }
+    }
+
+    setTimeout(() => this.captureFrame(video), 100);
   }
 
   async sendToOffscreen(videoTitle, formattedTime) {

@@ -183,79 +183,91 @@ function setupKeyboardShortcut() {
 function handleGifRecording(video) {
   if (!gifRecorder.isRecording()) {
     if (gifRecorder.startRecording(video)) {
-      showNotification("GIF recording started", "info");
+      showNotification(`GIF recording started (max ${gifRecorder.maxDuration}s)`, "info");
+
+      // Listen for auto-stop and process the GIF
+      const onAutoStop = () => {
+        document.removeEventListener("gifAutoStopped", onAutoStop);
+        showGifProcessingUI();
+      };
+      document.addEventListener("gifAutoStopped", onAutoStop);
     } else {
       showNotification("Failed to start GIF recording", "error");
     }
   } else {
     gifRecorder.stopRecording();
-    const progressBox = showNotification("Processing GIF...", "progress", 0);
+    showGifProcessingUI();
+  }
+}
 
-    const cancelButton = document.createElement("button");
-    cancelButton.textContent = "Cancel";
-    Object.assign(cancelButton.style, {
-      marginLeft: "4px",
-      padding: "4px 8px",
-      backgroundColor: "#ff4444",
-      border: "none",
-      borderRadius: "4px",
-      color: "white",
-      cursor: "pointer",
-      transition: "background-color 0.2s ease",
-    });
-    cancelButton.onmouseover = () =>
-      (cancelButton.style.backgroundColor = "#ff6666");
-    cancelButton.onmouseout = () =>
-      (cancelButton.style.backgroundColor = "#ff4444");
+// Show GIF processing UI with progress, cancel button, and event listeners
+function showGifProcessingUI() {
+  const progressBox = showNotification("Processing GIF...", "progress", 0);
 
-    cancelButton.onclick = () => {
-      gifRecorder.cancelRecording();
-      cleanup();
+  const cancelButton = document.createElement("button");
+  cancelButton.textContent = "Cancel";
+  Object.assign(cancelButton.style, {
+    marginLeft: "4px",
+    padding: "4px 8px",
+    backgroundColor: "#ff4444",
+    border: "none",
+    borderRadius: "4px",
+    color: "white",
+    cursor: "pointer",
+    transition: "background-color 0.2s ease",
+  });
+  cancelButton.onmouseover = () =>
+    (cancelButton.style.backgroundColor = "#ff6666");
+  cancelButton.onmouseout = () =>
+    (cancelButton.style.backgroundColor = "#ff4444");
+
+  cancelButton.onclick = () => {
+    gifRecorder.cancelRecording();
+    cleanup();
+    progressBox.remove();
+    currentNotification = null;
+    showNotification("GIF processing cancelled", "info");
+  };
+
+  progressBox.appendChild(cancelButton);
+
+  const onProgress = (e) => {
+    if (currentNotification === progressBox) {
+      const tempButton = progressBox.querySelector("button");
+      progressBox.textContent = `Processing GIF... ${String(
+        Math.round(e.detail * 100)
+      ).padStart(2, "0")}%`;
+      progressBox.appendChild(tempButton);
+    }
+  };
+
+  const onFinished = () => {
+    cleanup();
+    if (currentNotification === progressBox) {
       progressBox.remove();
       currentNotification = null;
-      showNotification("GIF processing cancelled", "info");
-    };
-
-    progressBox.appendChild(cancelButton);
-
-    const onProgress = (e) => {
-      if (currentNotification === progressBox) {
-        const tempButton = progressBox.querySelector("button");
-        progressBox.textContent = `Processing GIF... ${String(
-          Math.round(e.detail * 100)
-        ).padStart(2, "0")}%`;
-        progressBox.appendChild(tempButton);
-      }
-    };
-
-    const onFinished = () => {
-      cleanup();
-      if (currentNotification === progressBox) {
-        progressBox.remove();
-        currentNotification = null;
-        showNotification("GIF saved successfully!", "success");
-      }
-    };
-
-    const onError = () => {
-      cleanup();
-      if (currentNotification === progressBox) {
-        progressBox.remove();
-        currentNotification = null;
-        showNotification("Failed to process GIF", "error");
-      }
-    };
-
-    function cleanup() {
-      document.removeEventListener("gifProgress", onProgress);
-      document.removeEventListener("gifFinished", onFinished);
-      document.removeEventListener("gifError", onError);
+      showNotification("GIF saved successfully!", "success");
     }
+  };
 
-    document.addEventListener("gifProgress", onProgress);
-    document.addEventListener("gifFinished", onFinished);
-    document.addEventListener("gifError", onError);
+  const onError = () => {
+    cleanup();
+    if (currentNotification === progressBox) {
+      progressBox.remove();
+      currentNotification = null;
+      showNotification("Failed to process GIF", "error");
+    }
+  };
+
+  function cleanup() {
+    document.removeEventListener("gifProgress", onProgress);
+    document.removeEventListener("gifFinished", onFinished);
+    document.removeEventListener("gifError", onError);
   }
+
+  document.addEventListener("gifProgress", onProgress);
+  document.addEventListener("gifFinished", onFinished);
+  document.addEventListener("gifError", onError);
 }
 
 // Show notification (info, success, error, or progress)

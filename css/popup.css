@@ -251,7 +251,7 @@ kbd {
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     display: inline-block;
-    font-size: 0.85em;
+    font-size: 0.9em;
     font-weight: 500;
     line-height: 1.1;
     padding: 1px 5px;

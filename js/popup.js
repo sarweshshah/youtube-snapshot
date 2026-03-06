@@ -1,7 +1,9 @@
 // popup.js - Handles the extension popup UI and user settings
 
+const FEEDBACK_URL = "https://github.com";
+const RATE_US_URL = "https://chromewebstore.google.com";
+
 document.addEventListener("DOMContentLoaded", () => {
-  // Get references to DOM elements
   const fileOption = document.getElementById("fileOption");
   const clipboardOption = document.getElementById("clipboardOption");
   const formatOption = document.getElementById("formatOption");
@@ -23,13 +25,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const gifWidthValues = [480, 720, 1080];
 
-  // Show or hide file format option based on "Save as File" checkbox state
+  const aboutLogo = document.getElementById("aboutLogo");
+  if (aboutLogo) {
+    aboutLogo.src = chrome.runtime.getURL("icons/icon48.png");
+  }
+
+  const tabs = document.querySelectorAll(".tab[data-panel]");
+  const panels = document.querySelectorAll(".panel[data-panel]");
+
+  const showPanel = (panelId) => {
+    tabs.forEach((el) => {
+      const isActive = el.getAttribute("data-panel") === panelId;
+      el.classList.toggle("is-active", isActive);
+      el.setAttribute("aria-current", isActive ? "page" : null);
+    });
+    panels.forEach((panel) => {
+      const isTarget = panel.getAttribute("data-panel") === panelId;
+      panel.classList.toggle("is-visible", isTarget);
+      panel.hidden = !isTarget;
+    });
+  };
+
+  tabs.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      showPanel(btn.getAttribute("data-panel"));
+    });
+  });
+
+  showPanel("general");
+
   const toggleFormatOption = () => {
     formatSetting.style.display = fileOption.checked ? "flex" : "none";
     toggleQualityOption();
   };
 
-  // Show or hide JPG quality slider based on format selection
   const toggleQualityOption = () => {
     const showQuality = fileOption.checked && formatOption.value === "jpg";
     qualitySetting.style.display = showQuality ? "flex" : "none";
@@ -39,24 +68,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const fps = parseInt(gifFramerate.value, 10);
     const duration = parseInt(gifMaxDuration.value, 10);
     const width = gifWidthValues[parseInt(gifMaxWidth.value, 10)];
-
-    // Assume 16:9 aspect ratio
-    const height = Math.round(width * 9 / 16);
+    const height = Math.round((width * 9) / 16);
     const totalFrames = fps * duration;
-
-    // ~0.5 bytes per pixel per frame is a reasonable GIF compression estimate
     const estimatedBytes = totalFrames * width * height * 0.5;
 
     let sizeStr;
     if (estimatedBytes >= 1024 * 1024 * 1024) {
-      sizeStr = (estimatedBytes / (1024 * 1024 * 1024)).toFixed(1) + " GB";
+      sizeStr = "~" + (estimatedBytes / (1024 * 1024 * 1024)).toFixed(1) + " GB";
     } else if (estimatedBytes >= 1024 * 1024) {
-      sizeStr = (estimatedBytes / (1024 * 1024)).toFixed(1) + " MB";
+      sizeStr = "~" + (estimatedBytes / (1024 * 1024)).toFixed(1) + " MB";
     } else {
-      sizeStr = (estimatedBytes / 1024).toFixed(1) + " KB";
+      sizeStr = "~" + (estimatedBytes / 1024).toFixed(1) + " KB";
     }
 
-    gifEstimate.textContent = `Est. max size: ~${sizeStr}`;
+    gifEstimate.textContent = sizeStr;
     gifWarning.style.display = estimatedBytes >= 500 * 1024 * 1024 ? "block" : "none";
   };
 
@@ -66,8 +91,37 @@ document.addEventListener("DOMContentLoaded", () => {
     return !noneSelected;
   };
 
-  // Load saved preferences from chrome.storage and update UI
-  try {
+  const applyStoredToUI = (data) => {
+    fileOption.checked = data.saveAsFile ?? true;
+    clipboardOption.checked = data.saveToClipboard ?? true;
+    formatOption.value = data.fileFormat ?? "png";
+    soundOption.checked = !(data.playSound ?? true);
+
+    const quality = data.jpgQuality ?? 92;
+    qualitySlider.value = quality;
+    qualityValue.textContent = `${quality}%`;
+
+    const framerate = data.gifFramerate ?? 10;
+    gifFramerate.value = framerate;
+    framerateValue.textContent = `${framerate} fps`;
+    const duration = data.gifMaxDuration ?? 30;
+    gifMaxDuration.value = duration;
+    durationValue.textContent = `${duration}s`;
+    const storedWidth = data.gifMaxWidth ?? 720;
+    const widthIndex = gifWidthValues.indexOf(storedWidth);
+    gifMaxWidth.value = widthIndex !== -1 ? widthIndex : 1;
+    gifMaxWidthValue.textContent = `${gifWidthValues[gifMaxWidth.value]}px`;
+
+    toggleFormatOption();
+    validateOutputOptions();
+    updateGifEstimate();
+
+    const shortcutKey = (data.shortcutKey || "s").toUpperCase();
+    const snapshotPill = document.getElementById("shortcutSnapshot");
+    if (snapshotPill) snapshotPill.textContent = shortcutKey;
+  };
+
+  const loadSettings = () => {
     chrome.storage.sync.get(
       [
         "saveAsFile",
@@ -78,48 +132,71 @@ document.addEventListener("DOMContentLoaded", () => {
         "gifFramerate",
         "gifMaxDuration",
         "gifMaxWidth",
+        "shortcutKey",
       ],
       (data) => {
         if (chrome.runtime.lastError) {
-          console.error(
-            "Error accessing chrome.storage:",
-            chrome.runtime.lastError
-          );
+          console.error("Error accessing chrome.storage:", chrome.runtime.lastError);
           return;
         }
-        // Set UI state based on stored preferences, or use defaults
-        fileOption.checked = data.saveAsFile ?? true;
-        clipboardOption.checked = data.saveToClipboard ?? true;
-        formatOption.value = data.fileFormat ?? "png";
-        soundOption.checked = !(data.playSound ?? true);
-
-        // JPG quality
-        const quality = data.jpgQuality ?? 92;
-        qualitySlider.value = quality;
-        qualityValue.textContent = `${quality}%`;
-
-        // GIF settings
-        const framerate = data.gifFramerate ?? 10;
-        gifFramerate.value = framerate;
-        framerateValue.textContent = `${framerate} fps`;
-        const duration = data.gifMaxDuration ?? 30;
-        gifMaxDuration.value = duration;
-        durationValue.textContent = `${duration}s`;
-        const storedWidth = data.gifMaxWidth ?? 720;
-        const widthIndex = gifWidthValues.indexOf(storedWidth);
-        gifMaxWidth.value = widthIndex !== -1 ? widthIndex : 1;
-        gifMaxWidthValue.textContent = `${gifWidthValues[gifMaxWidth.value]}px`;
-
-        toggleFormatOption();
-        validateOutputOptions();
-        updateGifEstimate();
+        applyStoredToUI(data);
       }
     );
+  };
+
+  try {
+    loadSettings();
   } catch (error) {
     console.error("Error with chrome.storage access:", error);
   }
 
-  // Save preferences when checkboxes or dropdowns are changed
+  const restoreDefaultsBtn = document.getElementById("restoreDefaults");
+  if (restoreDefaultsBtn) {
+    restoreDefaultsBtn.addEventListener("click", () => {
+      const defaults = {
+        saveAsFile: true,
+        saveToClipboard: true,
+        fileFormat: "png",
+        jpgQuality: 92,
+        playSound: true,
+        gifFramerate: 10,
+        gifMaxDuration: 30,
+        gifMaxWidth: 720,
+        enableKeypress: true,
+        shortcutKey: "s",
+      };
+      chrome.storage.sync.set(defaults, () => {
+        applyStoredToUI(defaults);
+      });
+    });
+  }
+
+  const helpSupport = document.getElementById("helpSupport");
+  if (helpSupport) {
+    helpSupport.addEventListener("click", (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: FEEDBACK_URL });
+    });
+  }
+
+  const feedbackLink = document.getElementById("feedbackLink");
+  if (feedbackLink) {
+    feedbackLink.href = FEEDBACK_URL;
+    feedbackLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: FEEDBACK_URL });
+    });
+  }
+
+  const rateUsLink = document.getElementById("rateUsLink");
+  if (rateUsLink) {
+    rateUsLink.href = RATE_US_URL;
+    rateUsLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: RATE_US_URL });
+    });
+  }
+
   fileOption.addEventListener("change", () => {
     chrome.storage.sync.set({ saveAsFile: fileOption.checked });
     toggleFormatOption();
@@ -171,7 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.storage.sync.set({ gifMaxWidth: gifWidthValues[parseInt(gifMaxWidth.value, 10)] });
   });
 
-  // Display the extension version in the popup
   const manifestData = chrome.runtime.getManifest();
   versionElement.textContent = manifestData.version;
 });

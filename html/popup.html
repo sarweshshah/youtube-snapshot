@@ -9,122 +9,327 @@
   </head>
 
   <body>
-    <h1>Settings</h1>
-
-    <!-- Snapshot Output -->
-    <div class="section">
-      <div class="section-title">Snapshot</div>
-      <div class="setting">
-        <span class="info-text">Press <kbd>s</kbd> to take a snapshot</span>
-      </div>
-      <div class="setting">
-        <label for="clipboardOption">Save to Clipboard</label>
-        <input type="checkbox" id="clipboardOption" />
-      </div>
-      <div class="setting" id="fileOption_div">
-        <label for="fileOption">Save as File</label>
-        <input type="checkbox" id="fileOption" checked />
-      </div>
-      <div class="setting" id="formatSetting" style="display: none">
-        <label for="formatOption">File Format</label>
-        <select id="formatOption">
-          <option value="png">PNG</option>
-          <option value="jpg">JPG</option>
-        </select>
-      </div>
-      <div class="setting" id="qualitySetting" style="display: none">
-        <label for="qualitySlider">JPG Quality</label>
-        <div class="slider-group">
-          <input
-            type="range"
-            id="qualitySlider"
-            min="10"
-            max="100"
-            step="5"
-            value="92"
-          />
-          <span id="qualityValue" class="slider-value">92%</span>
-        </div>
-      </div>
-      <div
-        id="outputWarning"
-        class="warning-text warning-text--error"
-        style="display: none"
-      >
-        Enable at least one output option
-      </div>
-    </div>
-
-    <!-- GIF Settings -->
-    <div class="section">
-      <div class="section-title">GIF</div>
-      <div class="setting">
-        <span class="info-text"
-          >Press <kbd>g</kbd> to start/stop recording a GIF</span
+    <div class="popup">
+      <nav class="tab-bar" aria-label="Settings tabs">
+        <button
+          type="button"
+          class="tab is-active"
+          data-panel="general"
+          aria-current="page"
         >
-      </div>
-      <div class="setting">
-        <label for="gifFramerate">Framerate</label>
-        <div class="slider-group">
-          <input
-            type="range"
-            id="gifFramerate"
-            min="5"
-            max="20"
-            step="1"
-            value="10"
-          />
-          <span id="framerateValue" class="slider-value">10 fps</span>
-        </div>
-      </div>
-      <div class="setting">
-        <label for="gifMaxDuration">Max Duration</label>
-        <div class="slider-group">
-          <input
-            type="range"
-            id="gifMaxDuration"
-            min="5"
-            max="60"
-            step="5"
-            value="30"
-          />
-          <span id="durationValue" class="slider-value">30s</span>
-        </div>
-      </div>
-      <div class="setting">
-        <label for="gifMaxWidth">Frame Width</label>
-        <div class="slider-group">
-          <input
-            type="range"
-            id="gifMaxWidth"
-            min="0"
-            max="2"
-            step="1"
-            value="1"
-          />
-          <span id="gifMaxWidthValue" class="slider-value">720px</span>
-        </div>
-      </div>
-      <div id="gifEstimate" class="estimate-text"></div>
-      <div
-        id="gifWarning"
-        class="warning-text warning-text--caution"
-        style="display: none"
-      >
-        Processing may be slow at this size
-      </div>
-    </div>
+          <svg
+            class="tab-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+            />
+          </svg>
+          <span class="tab-label">General</span>
+        </button>
+        <button type="button" class="tab" data-panel="snapshot">
+          <svg
+            class="tab-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+            />
+            <circle cx="12" cy="13" r="4" />
+          </svg>
+          <span class="tab-label">Snapshot</span>
+        </button>
+        <button type="button" class="tab" data-panel="gif">
+          <svg
+            class="tab-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="23 7 16 12 23 17 23 7" />
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+          </svg>
+          <span class="tab-label">GIF</span>
+        </button>
+        <button type="button" class="tab" data-panel="shortcuts">
+          <svg
+            class="tab-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
+            <path
+              d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"
+            />
+          </svg>
+          <span class="tab-label">Shortcuts</span>
+        </button>
+        <button type="button" class="tab" data-panel="about">
+          <svg
+            class="tab-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+          </svg>
+          <span class="tab-label">About</span>
+        </button>
+      </nav>
 
-    <!-- General -->
-    <div class="section">
-      <div class="section-title">General</div>
-      <div class="setting">
-        <label for="soundOption">Disable Sound</label>
-        <input type="checkbox" id="soundOption" />
-      </div>
-    </div>
+      <main class="main">
+        <section
+          class="panel is-visible"
+          data-panel="general"
+          aria-labelledby="general-title"
+        >
+          <h5 id="general-title" class="panel-title">General Preferences</h5>
+          <p class="panel-subtitle">Configure global extension behavior.</p>
+          <div class="section card">
+            <div class="setting">
+              <label for="soundOption">Disable Sound Effects</label>
+              <input type="checkbox" id="soundOption" />
+            </div>
+          </div>
+          <button type="button" id="restoreDefaults" class="btn-restore">
+            Restore Defaults
+          </button>
+        </section>
 
-    <footer>YouTube Snapshot v<span id="version"></span></footer>
+        <section
+          class="panel"
+          data-panel="snapshot"
+          aria-labelledby="snapshot-title"
+          hidden
+        >
+          <h5 id="snapshot-title" class="panel-title">Snapshot Settings</h5>
+          <p class="panel-subtitle">
+            Configure how images are captured and saved.
+          </p>
+          <div class="section card">
+            <div class="setting">
+              <label for="clipboardOption">Save to Clipboard</label>
+              <input type="checkbox" id="clipboardOption" />
+            </div>
+            <div class="setting" id="fileOption_div">
+              <label for="fileOption">Save as File</label>
+              <input type="checkbox" id="fileOption" checked />
+            </div>
+            <div
+              id="outputWarning"
+              class="warning-text warning-text--error"
+              style="display: none"
+            >
+              Enable at least one output option
+            </div>
+          </div>
+          <div class="section card">
+            <div class="setting" id="formatSetting" style="display: none">
+              <label for="formatOption">File Format</label>
+              <select id="formatOption">
+                <option value="png">PNG</option>
+                <option value="jpg">JPG</option>
+              </select>
+            </div>
+            <div class="setting" id="qualitySetting" style="display: none">
+              <label for="qualitySlider">JPG Quality</label>
+              <div class="slider-group">
+                <input
+                  type="range"
+                  id="qualitySlider"
+                  min="10"
+                  max="100"
+                  step="5"
+                  value="92"
+                />
+                <span id="qualityValue" class="slider-value">92%</span>
+              </div>
+            </div>
+          </div>
+          <div class="info-box info-box--blue">
+            <span class="info-box-icon" aria-hidden="true">i</span>
+            <p>
+              Snapshots are captured at the video's native resolution for
+              maximum quality.
+            </p>
+          </div>
+        </section>
+
+        <section
+          class="panel"
+          data-panel="gif"
+          aria-labelledby="gif-title"
+          hidden
+        >
+          <h5 id="gif-title" class="panel-title">GIF Recording</h5>
+          <p class="panel-subtitle">
+            Adjust capture rate and output dimensions.
+          </p>
+          <div class="section card">
+            <div class="setting">
+              <label for="gifFramerate">Framerate</label>
+              <div class="slider-group">
+                <input
+                  type="range"
+                  id="gifFramerate"
+                  min="5"
+                  max="20"
+                  step="1"
+                  value="10"
+                />
+                <span id="framerateValue" class="slider-value">10 fps</span>
+              </div>
+            </div>
+            <div class="setting">
+              <label for="gifMaxDuration">Max Duration</label>
+              <div class="slider-group">
+                <input
+                  type="range"
+                  id="gifMaxDuration"
+                  min="5"
+                  max="60"
+                  step="5"
+                  value="30"
+                />
+                <span id="durationValue" class="slider-value">30s</span>
+              </div>
+            </div>
+            <div class="setting">
+              <label for="gifMaxWidth">Frame Width</label>
+              <div class="slider-group">
+                <input
+                  type="range"
+                  id="gifMaxWidth"
+                  min="0"
+                  max="2"
+                  step="1"
+                  value="1"
+                />
+                <span id="gifMaxWidthValue" class="slider-value">720px</span>
+              </div>
+            </div>
+            <div
+              id="gifWarning"
+              class="warning-text warning-text--caution"
+              style="display: none"
+            >
+              Processing may be slow at this size
+            </div>
+          </div>
+          <div class="section card">
+            <div class="section-footer-header">ESTIMATED MAX SIZE</div>
+            <div class="section-footer-content">
+              <p class="section-footer-desc">
+                Actual size varies based on video content complexity and
+                movement.
+              </p>
+              <span id="gifEstimate" class="estimate-value"></span>
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="panel"
+          data-panel="shortcuts"
+          aria-labelledby="shortcuts-title"
+          hidden
+        >
+          <h5 id="shortcuts-title" class="panel-title">Keyboard Shortcuts</h5>
+          <p class="panel-subtitle">Quickly trigger actions while watching.</p>
+          <div class="section card">
+            <div class="setting setting--shortcut">
+              <span class="info-text">Capture snapshot</span>
+              <kbd class="key-pill" id="shortcutSnapshot">s</kbd>
+            </div>
+            <div class="setting setting--shortcut">
+              <span class="info-text">Toggle GIF record (start/stop)</span>
+              <kbd class="key-pill" id="shortcutGif">g</kbd>
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="panel"
+          data-panel="about"
+          aria-labelledby="about-title"
+          hidden
+        >
+          <div class="section card about-card">
+            <div class="about-header">
+              <img class="about-logo" src="" alt="" id="aboutLogo" />
+              <div class="about-brand">
+                <span class="about-title">YouTube Snapshot</span>
+                <span class="about-version">v<span id="version"></span></span>
+              </div>
+            </div>
+            <a href="#" id="helpSupport" class="about-link">
+              <span class="about-link-icon" aria-hidden="true">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </span>
+              <span>Help & Support</span>
+            </a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="popup-footer">
+        <span class="popup-footer-notice"
+          >Your data is stored locally in your browser</span
+        >
+        <div class="popup-footer-links">
+          <a href="#" id="feedbackLink" target="_blank" rel="noopener"
+            >FEEDBACK</a
+          >
+          <a href="#" id="rateUsLink" target="_blank" rel="noopener">RATE US</a>
+        </div>
+      </footer>
+    </div>
 
     <script src="../js/popup.js"></script>
   </body>

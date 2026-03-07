@@ -4,11 +4,13 @@
   "description": "Take snapshots of YouTube videos and save to clipboard or file.",
   "private": true,
   "scripts": {
-    "build": "node scripts/build.js"
+    "build": "node scripts/build.js",
+    "dev": "nodemon --watch js --watch css --watch html --watch manifest.json --ext js,css,html,json --exec \"npm run build\""
   },
   "devDependencies": {
     "clean-css": "^5.3.3",
     "html-minifier-terser": "^7.2.0",
+    "nodemon": "^3.1.14",
     "sharp": "^0.34.5",
     "terser": "^5.27.0"
   }

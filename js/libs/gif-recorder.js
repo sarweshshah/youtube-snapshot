@@ -14,10 +14,10 @@ class GIFRecorder {
     this.width = 0;
     this.height = 0;
     this.chunks = [];
-    this.maxDuration = 30; // Default max recording duration in seconds
-    this.framerate = 10; // Default framerate in fps
-    this.maxWidth = 0; // 0 = source resolution
-    this.frameInterval = 100; // ms between frames (derived from framerate)
+    this.maxDuration = 30;
+    this.framerate = 10;
+    this.maxWidth = 0;
+    this.frameInterval = 100;
 
     chrome.runtime.onMessage.addListener((msg) => {
       switch (msg.type) {
@@ -46,22 +46,21 @@ class GIFRecorder {
     this.recording = true;
     this.isCancelled = false;
     this.frames = [];
+    this.chunks = [];
     this.frameCount = 0;
     this.startTime = Date.now();
     this.autoStopVideo = video;
 
-    // Load GIF settings from storage, then begin capture
     chrome.storage.sync.get(
       ["gifFramerate", "gifMaxDuration", "gifMaxWidth"],
       (data) => {
-        if (!this.recording) return; // cancelled before storage returned
+        if (!this.recording) return;
 
         this.framerate = data.gifFramerate || 10;
         this.maxDuration = data.gifMaxDuration || 30;
-        this.maxWidth = data.gifMaxWidth || 0; // 0 = source
+        this.maxWidth = data.gifMaxWidth || 0;
         this.frameInterval = Math.round(1000 / this.framerate);
 
-        // Determine max width: 0 means source, otherwise cap at configured value
         const effectiveMaxWidth = this.maxWidth > 0 ? this.maxWidth : video.videoWidth;
         const scale = Math.min(1, effectiveMaxWidth / video.videoWidth);
         this.width = Math.floor(video.videoWidth * scale);
@@ -94,7 +93,6 @@ class GIFRecorder {
       const video = document.querySelector("video");
       const videoTitle = this.getTitleFromHeadTag();
       const formattedTime = this.formatTime(video.currentTime);
-
       this.sendToOffscreen(videoTitle, formattedTime);
     } catch (error) {
       console.error("Error stopping recording:", error);
@@ -108,15 +106,12 @@ class GIFRecorder {
   captureFrame(video) {
     if (!this.recording) return;
 
-    // Auto-stop if max duration reached
     if (this.getDuration() >= this.maxDuration) {
       document.dispatchEvent(new CustomEvent("gifAutoStopped"));
       this.stopRecording();
       return;
     }
 
-    // Skip frame capture while video is paused to avoid duplicate frames.
-    // Keep the timer running so recording resumes when playback resumes.
     if (!video.paused) {
       try {
         this.ctx.drawImage(video, 0, 0, this.width, this.height);
@@ -169,6 +164,7 @@ class GIFRecorder {
 
       this.frames = [];
     } catch (error) {
+      if (this.isCancelled) return;
       console.error("Error sending to offscreen:", error);
       this.frames = [];
       document.dispatchEvent(
@@ -191,23 +187,21 @@ class GIFRecorder {
 
   handleChunk(msg) {
     if (this.isCancelled) return;
-    
+
     this.chunks[msg.index] = msg.chunk;
-    
+
     let receivedCount = 0;
     for (let i = 0; i < msg.total; i++) {
-      if (this.chunks[i] !== undefined) {
-        receivedCount++;
-      }
+      if (this.chunks[i] !== undefined) receivedCount++;
     }
-    
+
     if (receivedCount === msg.total) {
       const dataUrl = this.chunks.join("");
       this.chunks = [];
       this.handleFinished({
         dataUrl,
         videoTitle: msg.videoTitle,
-        formattedTime: msg.formattedTime
+        formattedTime: msg.formattedTime,
       });
     }
   }
@@ -215,12 +209,18 @@ class GIFRecorder {
   handleFinished(msg) {
     if (this.isCancelled) return;
 
-    const link = document.createElement("a");
-    link.href = msg.dataUrl;
-    link.download = `${msg.videoTitle} [${msg.formattedTime}].gif`;
-    link.click();
+    // Defer the download by one tick so a pending cancel-click in the event
+    // queue has a chance to set isCancelled before we trigger the save.
+    setTimeout(() => {
+      if (this.isCancelled) return;
 
-    document.dispatchEvent(new CustomEvent("gifFinished"));
+      const link = document.createElement("a");
+      link.href = msg.dataUrl;
+      link.download = `${msg.videoTitle} [${msg.formattedTime}].gif`;
+      link.click();
+
+      document.dispatchEvent(new CustomEvent("gifFinished"));
+    }, 0);
   }
 
   getTitleFromHeadTag() {
@@ -249,8 +249,6 @@ class GIFRecorder {
   }
 
   cancelRecording() {
-    if (!this.recording && this.frames.length === 0 && this.chunks.length === 0) return;
-
     this.isCancelled = true;
     this.recording = false;
     this.frames = [];
@@ -260,7 +258,11 @@ class GIFRecorder {
     this.canvas = null;
     this.ctx = null;
 
-    chrome.runtime.sendMessage({ target: "offscreen", type: "gif-cancel" });
+    try {
+      chrome.runtime.sendMessage({ target: "offscreen", type: "gif-cancel" });
+    } catch (e) {
+      // offscreen doc may not exist
+    }
   }
 }
 

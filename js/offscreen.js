@@ -6,6 +6,7 @@ let gifWidth = 0;
 let gifHeight = 0;
 let currentGif = null;
 let currentTabId = null;
+let isCancelled = false;
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.target !== "offscreen") return;
@@ -16,18 +17,23 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       gifHeight = msg.height;
       frames.push(decodeFrame(msg.data, msg.width, msg.height));
       sendResponse({ ok: true });
-      break;
+      return true;
 
     case "gif-render":
       currentTabId = msg.tabId;
+      isCancelled = false;
       renderGIF(msg.videoTitle, msg.formattedTime, msg.frameDelay || 100);
       sendResponse({ ok: true });
-      break;
+      return true;
 
     case "gif-cancel":
-      cancelRender();
+      isCancelled = true;
+      if (currentGif) {
+        try { currentGif.abort(); } catch (e) { /* ok */ }
+      }
+      cleanup();
       sendResponse({ ok: true });
-      break;
+      return true;
   }
 });
 
@@ -41,6 +47,7 @@ function decodeFrame(base64, width, height) {
 }
 
 function sendToTab(message) {
+  if (currentTabId == null) return;
   chrome.runtime.sendMessage({ ...message, tabId: currentTabId });
 }
 
@@ -59,21 +66,31 @@ function renderGIF(videoTitle, formattedTime, frameDelay) {
     }
 
     currentGif.on("progress", (p) => {
+      if (isCancelled) return;
       sendToTab({ type: "gif-progress", progress: p });
     });
 
     currentGif.on("finished", (blob) => {
+      if (isCancelled) {
+        cleanup();
+        return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
+        if (isCancelled) {
+          cleanup();
+          return;
+        }
         const dataUrl = reader.result;
-        const CHUNK_SIZE = 10 * 1024 * 1024; // 10MB chunks
+        const CHUNK_SIZE = 10 * 1024 * 1024;
         const totalChunks = Math.ceil(dataUrl.length / CHUNK_SIZE);
-        
+
         for (let i = 0; i < totalChunks; i++) {
+          if (isCancelled) break;
           const chunk = dataUrl.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
           sendToTab({
             type: "gif-chunk",
-            chunk: chunk,
+            chunk,
             index: i,
             total: totalChunks,
             videoTitle,
@@ -91,13 +108,6 @@ function renderGIF(videoTitle, formattedTime, frameDelay) {
     sendToTab({ type: "gif-error", error: error.message });
     cleanup();
   }
-}
-
-function cancelRender() {
-  if (currentGif) {
-    currentGif.abort();
-  }
-  cleanup();
 }
 
 function cleanup() {

@@ -25,11 +25,21 @@ window.onload = function () {
 
 function loadUserSettings() {
   chrome.storage.sync.get(
-    ["saveAsFile", "saveToClipboard", "enableKeypress", "shortcutKey", "fileFormat", "playSound"],
+    [
+      "saveAsFile",
+      "saveToClipboard",
+      "enableKeypress",
+      "shortcutKey",
+      "fileFormat",
+      "playSound",
+    ],
     (data) => {
-      if (data.saveAsFile === undefined) chrome.storage.sync.set({ saveAsFile: true });
-      if (data.saveToClipboard === undefined) chrome.storage.sync.set({ saveToClipboard: true });
-      if (data.enableKeypress === undefined) chrome.storage.sync.set({ enableKeypress: true });
+      if (data.saveAsFile === undefined)
+        chrome.storage.sync.set({ saveAsFile: true });
+      if (data.saveToClipboard === undefined)
+        chrome.storage.sync.set({ saveToClipboard: true });
+      if (data.enableKeypress === undefined)
+        chrome.storage.sync.set({ enableKeypress: true });
       currentShortcutKey = data.shortcutKey || currentShortcutKey;
       chrome.storage.sync.set({ fileFormat: data.fileFormat || "png" });
     },
@@ -109,7 +119,11 @@ function injectButtons() {
 
     const img = document.createElement("img");
     img.src = chrome.runtime.getURL("icons/snapshot-icon.png");
-    Object.assign(img.style, { width: "auto", height: "50%", display: "block" });
+    Object.assign(img.style, {
+      width: "auto",
+      height: "50%",
+      display: "block",
+    });
     btn.appendChild(img);
 
     controls.insertBefore(btn, controls.firstChild);
@@ -133,7 +147,9 @@ function injectButtons() {
 // --- Fullscreen & SPA navigation ---
 
 function setupFullscreenListener() {
-  document.addEventListener("fullscreenchange", () => setTimeout(injectButtons, 200));
+  document.addEventListener("fullscreenchange", () =>
+    setTimeout(injectButtons, 200),
+  );
 }
 
 function setupSPANavigationListener() {
@@ -155,20 +171,30 @@ function isEventFromEditable(event) {
   if (!target) return false;
 
   if (typeof target.closest === "function") {
-    if (target.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]')) {
+    if (
+      target.closest(
+        'input, textarea, select, [contenteditable=""], [contenteditable="true"]',
+      )
+    ) {
       return true;
     }
   }
 
   const tag = target.tagName?.toUpperCase() || "";
-  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable;
+  return (
+    tag === "INPUT" ||
+    tag === "TEXTAREA" ||
+    tag === "SELECT" ||
+    target.isContentEditable
+  );
 }
 
 function setupKeyboardShortcut() {
   let keypressListener;
 
   const updateKeypressListener = () => {
-    if (keypressListener) document.removeEventListener("keypress", keypressListener);
+    if (keypressListener)
+      document.removeEventListener("keypress", keypressListener);
 
     chrome.storage.sync.get(["enableKeypress", "shortcutKey"], (data) => {
       const shortcutKey = data.shortcutKey || "s";
@@ -201,7 +227,10 @@ function setupKeyboardShortcut() {
 function isAdPlaying(video) {
   const player = video.closest(".html5-video-player");
   if (!player) return false;
-  return player.classList.contains("ad-showing") || !!player.querySelector(".ytp-ad-player-overlay");
+  return (
+    player.classList.contains("ad-showing") ||
+    !!player.querySelector(".ytp-ad-player-overlay")
+  );
 }
 
 function isBlackFrame(canvas) {
@@ -227,7 +256,8 @@ function flashOverlay(video) {
   const player = video.closest(".html5-video-player") || video.parentElement;
   if (!player) return;
 
-  if (getComputedStyle(player).position === "static") player.style.position = "relative";
+  if (getComputedStyle(player).position === "static")
+    player.style.position = "relative";
 
   const flash = document.createElement("div");
   Object.assign(flash.style, {
@@ -283,7 +313,8 @@ function showRecordingIndicator(video) {
   const player = video.closest(".html5-video-player") || video.parentElement;
   if (!player) return;
 
-  if (getComputedStyle(player).position === "static") player.style.position = "relative";
+  if (getComputedStyle(player).position === "static")
+    player.style.position = "relative";
 
   injectRecordingStyles();
 
@@ -301,7 +332,8 @@ function showRecordingIndicator(video) {
     padding: "6px 12px 6px 10px",
     zIndex: "2147483647",
     pointerEvents: "none",
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.5)",
     animation: "yt-snapshot-slide-in 0.3s ease-out forwards",
   });
@@ -344,17 +376,21 @@ function showRecordingIndicator(video) {
       return;
     }
 
+    // Re-query the live video element each tick so we track the correct
+    // paused state even if YouTube swaps the <video> element.
+    const liveVideo = resolveActiveVideo() || video;
+
     const now = Date.now();
     let elapsedMs;
-    if (video.paused) {
+    if (liveVideo.paused) {
       if (pausedAt === null) pausedAt = now;
-      elapsedMs = (pausedAt - recStartTime) - totalPausedMs;
+      elapsedMs = pausedAt - recStartTime - totalPausedMs;
     } else {
       if (pausedAt !== null) {
         totalPausedMs += now - pausedAt;
         pausedAt = null;
       }
-      elapsedMs = (now - recStartTime) - totalPausedMs;
+      elapsedMs = now - recStartTime - totalPausedMs;
     }
     const elapsed = Math.max(0, Math.floor(elapsedMs / 1000));
     const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
@@ -364,7 +400,7 @@ function showRecordingIndicator(video) {
 
     const dotEl = indicator.querySelector(".yt-snapshot-rec-dot");
     if (dotEl) {
-      if (video.paused) {
+      if (liveVideo.paused) {
         dotEl.style.animation = "none";
         dotEl.style.opacity = "0.5";
       } else {
@@ -390,7 +426,9 @@ function removeRecordingIndicator(immediate) {
   } else {
     el.style.animation = "yt-snapshot-slide-out 0.3s ease-in forwards";
     el.addEventListener("animationend", () => el.remove(), { once: true });
-    setTimeout(() => { if (el.parentNode) el.remove(); }, 400);
+    setTimeout(() => {
+      if (el.parentNode) el.remove();
+    }, 400);
   }
 }
 
@@ -398,8 +436,11 @@ function removeRecordingIndicator(immediate) {
 
 async function getGifRecorder() {
   if (gifRecorder) return gifRecorder;
-  const response = await chrome.runtime.sendMessage({ type: "inject-gif-recorder" });
-  if (!response?.ok) throw new Error(response?.error || "Failed to inject GIF recorder");
+  const response = await chrome.runtime.sendMessage({
+    type: "inject-gif-recorder",
+  });
+  if (!response?.ok)
+    throw new Error(response?.error || "Failed to inject GIF recorder");
   gifRecorder = new GIFRecorder();
   return gifRecorder;
 }
@@ -430,10 +471,12 @@ async function handleGifRecording(video) {
       document.addEventListener("gifAutoStopped", onAutoStop);
 
       const onPause = () => {
-        if (gifRecorder.isRecording()) showNotification("Recording paused", "info");
+        if (gifRecorder.isRecording())
+          showNotification("Recording paused", "info");
       };
       const onPlay = () => {
-        if (gifRecorder.isRecording()) showNotification("Recording resumed", "info");
+        if (gifRecorder.isRecording())
+          showNotification("Recording resumed", "info");
       };
       video.addEventListener("pause", onPause);
       video.addEventListener("play", onPlay);
@@ -463,40 +506,74 @@ function removeVideoPauseListeners() {
 function showGifProcessingUI() {
   const progressBox = showNotification("Processing GIF...", "progress", 0);
 
+  // Replace the bare text node with a span so we can update it without
+  // destroying sibling elements (spinner, cancel button).
+  for (const node of [...progressBox.childNodes]) {
+    if (
+      node.nodeType === Node.TEXT_NODE &&
+      node.textContent.includes("Processing")
+    ) {
+      const span = document.createElement("span");
+      span.textContent = node.textContent;
+      progressBox.replaceChild(span, node);
+      break;
+    }
+  }
+
   const cancelBtn = document.createElement("button");
+  cancelBtn.type = "button";
   cancelBtn.textContent = "Cancel";
   Object.assign(cancelBtn.style, {
-    marginLeft: "4px",
-    padding: "4px 8px",
+    marginLeft: "8px",
+    padding: "6px 12px",
     backgroundColor: "#ff4444",
     border: "none",
     borderRadius: "4px",
     color: "white",
     cursor: "pointer",
-    transition: "background-color 0.2s ease",
+    pointerEvents: "auto",
+    flexShrink: "0",
   });
-  cancelBtn.onmouseover = () => (cancelBtn.style.backgroundColor = "#ff6666");
-  cancelBtn.onmouseout = () => (cancelBtn.style.backgroundColor = "#ff4444");
-  cancelBtn.onclick = () => {
+  let cancelled = false;
+  function doCancel() {
+    if (cancelled) return;
+    cancelled = true;
     removeVideoPauseListeners();
     removeRecordingIndicator();
-    gifRecorder.cancelRecording();
-    cleanup();
+    if (gifRecorder) gifRecorder.cancelRecording();
+    teardown();
     progressBox.remove();
     currentNotification = null;
     showNotification("GIF processing cancelled", "info");
-  };
+  }
+
+  cancelBtn.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    doCancel();
+  });
+
+  // Also allow Escape key to cancel
+  function onKeydown(ev) {
+    if (ev.key === "Escape") {
+      ev.preventDefault();
+      ev.stopPropagation();
+      doCancel();
+    }
+  }
+  document.addEventListener("keydown", onKeydown, true);
+
   progressBox.appendChild(cancelBtn);
 
   const onProgress = (e) => {
-    if (currentNotification !== progressBox) return;
-    const btn = progressBox.querySelector("button");
-    progressBox.textContent = `Processing GIF... ${String(Math.round(e.detail * 100)).padStart(2, "0")}%`;
-    progressBox.appendChild(btn);
+    if (cancelled || currentNotification !== progressBox) return;
+    const pct = String(Math.round(e.detail * 100)).padStart(2, "0");
+    const span = progressBox.querySelector("span");
+    if (span) span.textContent = `Processing GIF... ${pct}%`;
   };
 
   const onFinished = () => {
-    cleanup();
+    if (cancelled) return;
+    teardown();
     if (currentNotification !== progressBox) return;
     progressBox.remove();
     currentNotification = null;
@@ -504,17 +581,19 @@ function showGifProcessingUI() {
   };
 
   const onError = () => {
-    cleanup();
+    if (cancelled) return;
+    teardown();
     if (currentNotification !== progressBox) return;
     progressBox.remove();
     currentNotification = null;
     showNotification("Failed to process GIF", "error");
   };
 
-  function cleanup() {
+  function teardown() {
     document.removeEventListener("gifProgress", onProgress);
     document.removeEventListener("gifFinished", onFinished);
     document.removeEventListener("gifError", onError);
+    document.removeEventListener("keydown", onKeydown, true);
   }
 
   document.addEventListener("gifProgress", onProgress);
@@ -537,17 +616,26 @@ function showNotification(message, type = "info", duration = 3000) {
     position: "fixed",
     bottom: "20px",
     right: "20px",
-    backgroundColor: type === "info" ? "#333" : type === "success" ? "#409656" : "#ff4444",
+    backgroundColor:
+      type === "info"
+        ? "#333"
+        : type === "success"
+          ? "#409656"
+          : type === "progress"
+            ? "#c93333"
+            : "#ff4444",
     color: "#fff",
     padding: "12px 16px",
     borderRadius: "8px",
-    zIndex: "1000",
+    zIndex: "2147483647",
+    pointerEvents: "auto",
     display: "flex",
     alignItems: "center",
     gap: "8px",
     opacity: "0",
     transition: "opacity 0.2s ease-in-out",
   });
+  box.setAttribute("data-yt-snapshot-notification", "1");
 
   if (type === "progress") {
     const spinner = document.createElement("div");
@@ -611,7 +699,10 @@ function takeSnapshot(video) {
     ["fileFormat", "jpgQuality", "saveAsFile", "saveToClipboard", "playSound"],
     (data) => {
       if (!data.saveAsFile && !data.saveToClipboard) {
-        showNotification("No output enabled — check extension settings", "error");
+        showNotification(
+          "No output enabled — check extension settings",
+          "error",
+        );
         return;
       }
 
@@ -624,18 +715,24 @@ function takeSnapshot(video) {
       const canvas = document.createElement("canvas");
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas
+        .getContext("2d")
+        .drawImage(video, 0, 0, canvas.width, canvas.height);
 
       if (isBlackFrame(canvas)) {
-        showNotification("This video is protected and cannot be captured", "error");
+        showNotification(
+          "This video is protected and cannot be captured",
+          "error",
+        );
         return;
       }
 
       flashOverlay(video);
 
-      const dataURL = format === "jpg"
-        ? canvas.toDataURL(mimeType, jpgQuality)
-        : canvas.toDataURL(mimeType);
+      const dataURL =
+        format === "jpg"
+          ? canvas.toDataURL(mimeType, jpgQuality)
+          : canvas.toDataURL(mimeType);
 
       if (data.saveAsFile) {
         const link = document.createElement("a");

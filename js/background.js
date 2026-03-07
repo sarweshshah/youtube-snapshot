@@ -18,14 +18,14 @@ async function ensureOffscreenDocument() {
     justification: "GIF encoding requires Web Workers blocked by page CSP",
   });
 
-  // Allow offscreen document scripts to initialize before returning
   await new Promise((r) => setTimeout(r, 100));
 }
 
 // --- Message relay between offscreen doc and content script tabs ---
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  // Messages targeted at the offscreen doc — skip entirely in the service worker
+  // Messages targeted at the offscreen doc are delivered directly by the
+  // runtime — the service worker must not re-send them or they get doubled.
   if (msg.target === "offscreen") return;
 
   if (msg.type === "inject-gif-recorder") {
@@ -53,7 +53,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Relay progress/result/error from offscreen doc back to the content script tab
   if (
     msg.type === "gif-progress" ||
-    msg.type === "gif-finished" ||
     msg.type === "gif-chunk" ||
     msg.type === "gif-error"
   ) {

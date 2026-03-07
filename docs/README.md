@@ -18,6 +18,14 @@ YouTube Snapshot is a lightweight Chrome extension that adds a Snapshot button t
 
 ![Repository structure](repo%20structure.png)
 
+| Script            | Role                                                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `background.js`   | Creates the offscreen document when needed and relays runtime messages between tab and offscreen contexts.                      |
+| `content.js`      | Runs in YouTube pages/embeds, injects snapshot UI, handles shortcuts, captures PNG/JPG frames, and starts/stops GIF recording.  |
+| `gif-recorder.js` | Captures frames in a loop, sends frame data for encoding, receives progress/chunks, and finalizes GIF download.                 |
+| `offscreen.js`    | Receives frames, coordinates GIF encoding through `gif.js` workers, and streams encoded chunks/progress back to the active tab. |
+| `popup.js`        | Reads/writes `chrome.storage.sync` settings for snapshot and GIF preferences.                                                   |
+
 ## Technical Documentation
 
 Script responsibilities, snapshot/GIF runtime flow, and implementation details are documented in [`ARCHITECTURE.md`](ARCHITECTURE.md).
@@ -33,6 +41,7 @@ The Extension does **not** collect, store, or transmit personal information, acc
 ### Permissions and Why They Are Required
 
 The Extension requests only the permissions needed for core functionality:
+
 - **`storage`**: Stores your preferences, such as capture format, quality, sound effects, GIF frame rate, and duration.
 - **`webNavigation`**: Detects and supports YouTube embeds and iframe contexts where standard page lifecycle hooks are insufficient.
 - **`scripting`**: Injects runtime capture logic into supported YouTube player pages/frames.

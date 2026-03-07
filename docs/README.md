@@ -9,7 +9,7 @@ YouTube Snapshot is a lightweight Chrome extension that adds a Snapshot button t
 - **One-Click Snapshots**: Capture screenshots from the current video frame.
 - **GIF Recording**: Start and stop GIF capture quickly with `g`.
 - **Flexible Save Options**: Save captures as PNG/JPG and optionally copy images to clipboard.
-- **Customizable Settings**: Configure quality, sound, frame rate, max GIF duration, and width.
+- **Customizable Settings**: Configure quality, sound, frame rate, max GIF duration, and frame size.
 - **Smart File Naming**: Uses video title and timestamp for easier organization.
 - **Embedded Video Support**: Works on YouTube and supported embedded YouTube players.
 
@@ -27,14 +27,11 @@ This Privacy Policy describes how the YouTube Snapshot Chrome extension ("the Ex
 
 ### Information We Collect
 
-The Extension does **not** collect, store, or transmit personal information, account credentials, browsing history, or captured media to external servers.
-
-All snapshot and GIF operations are performed locally in your browser context. Captured files are only saved based on your chosen actions (download and/or clipboard copy).
+The Extension does **not** collect, store, or transmit personal information, account credentials, browsing history, or captured media to external servers. All snapshot and GIF operations are performed locally in your browser context. Captured files are only saved based on your chosen actions (download and/or clipboard copy).
 
 ### Permissions and Why They Are Required
 
 The Extension requests only the permissions needed for core functionality:
-
 - **`storage`**: Stores your preferences, such as capture format, quality, sound effects, GIF frame rate, and duration.
 - **`webNavigation`**: Detects and supports YouTube embeds and iframe contexts where standard page lifecycle hooks are insufficient.
 - **`scripting`**: Injects runtime capture logic into supported YouTube player pages/frames.
@@ -42,9 +39,7 @@ The Extension requests only the permissions needed for core functionality:
 
 ### How Information Is Used
 
-Any locally available context (for example, video title and timestamp) is used only to generate filenames and complete capture actions initiated by you.
-
-The Extension does not profile users, track activity across sites for analytics, or build behavioral records.
+Any locally available context (for example, video title and timestamp) is used only to generate filenames and complete capture actions initiated by you. The Extension does not profile users, track activity across sites for analytics, or build behavioral records.
 
 ### Data Storage and Retention
 
@@ -54,15 +49,11 @@ The Extension does not profile users, track activity across sites for analytics,
 
 ### Third-Party Sharing
 
-The Extension does not sell, rent, or share personal data with third parties.
-
-No capture content is transmitted to third-party APIs, ad networks, or analytics providers by the Extension.
+The Extension does not sell, rent, or share personal data with third parties. No capture content is transmitted to third-party APIs, ad networks, or analytics providers by the Extension.
 
 ### Security
 
-Because processing is local and no personal data pipeline is maintained by the Extension, exposure risk is minimized.
-
-The codebase is maintained to support intended behavior only, and permissions are scoped to functional requirements.
+Because processing is local and no personal data pipeline is maintained by the Extension, exposure risk is minimized. The codebase is maintained to support intended behavior only, and permissions are scoped to functional requirements.
 
 ### Policy Updates
 

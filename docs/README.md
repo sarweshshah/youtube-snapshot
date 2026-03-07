@@ -26,10 +26,6 @@ YouTube Snapshot is a lightweight Chrome extension that adds a Snapshot button t
 | `offscreen.js`    | Receives frames, coordinates GIF encoding through `gif.js` workers, and streams encoded chunks/progress back to the active tab. |
 | `popup.js`        | Reads/writes `chrome.storage.sync` settings for snapshot and GIF preferences.                                                   |
 
-## Technical Documentation
-
-Script responsibilities, snapshot/GIF runtime flow, and implementation details are documented in [`ARCHITECTURE.md`](ARCHITECTURE.md).
-
 ## Privacy Policy
 
 This Privacy Policy describes how the YouTube Snapshot Chrome extension ("the Extension") handles information.

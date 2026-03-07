@@ -1,8 +1,7 @@
-![YouTube Snapshot logo](../icons/icon128.png)
-
-# Youtube Snapshot
-
-Capture and Save YouTube Moments with Ease
+<p align="center">
+  <img src="../icons/icon128.png" alt="YouTube Snapshot logo" width="64" height="64"/>
+</p>
+<h1 align="center">Youtube Snapshot</h1>
 
 YouTube Snapshot is a lightweight Chrome extension that adds a Snapshot button to YouTube players, including embedded players. It lets you quickly capture a frame as an image or record a short GIF clip without leaving the page.
 

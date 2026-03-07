@@ -1,13 +1,15 @@
 // popup.js - Handles the extension popup UI and user settings
 
-const FEEDBACK_URL = "https://github.com";
-const RATE_US_URL = "https://chromewebstore.google.com";
+const SUPPORT_URL = "https://chromewebstore.google.com/detail/cpecoochkebbnkkonbjikioehccfclfa/support?hl=en&authuser=0";
+const RATE_US_URL = "https://chromewebstore.google.com/detail/cpecoochkebbnkkonbjikioehccfclfa?utm_source=item-share-cb";
+const GITHUB_URL = "https://github.com/sarweshshah/youtube-snapshot";
 
 document.addEventListener("DOMContentLoaded", () => {
   const fileOption = document.getElementById("fileOption");
   const clipboardOption = document.getElementById("clipboardOption");
   const formatOption = document.getElementById("formatOption");
   const formatSetting = document.getElementById("formatSetting");
+  const formatCard = document.getElementById("formatCard");
   const qualitySetting = document.getElementById("qualitySetting");
   const qualitySlider = document.getElementById("qualitySlider");
   const qualityValue = document.getElementById("qualityValue");
@@ -25,11 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const gifWidthValues = [480, 720, 1080];
 
-  const aboutLogo = document.getElementById("aboutLogo");
-  if (aboutLogo) {
-    aboutLogo.src = chrome.runtime.getURL("icons/icon48.png");
-  }
-
   const tabs = document.querySelectorAll(".tab[data-panel]");
   const panels = document.querySelectorAll(".panel[data-panel]");
 
@@ -37,7 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
     tabs.forEach((el) => {
       const isActive = el.getAttribute("data-panel") === panelId;
       el.classList.toggle("is-active", isActive);
-      el.setAttribute("aria-current", isActive ? "page" : null);
+      if (isActive) el.setAttribute("aria-current", "page");
+      else el.removeAttribute("aria-current");
     });
     panels.forEach((panel) => {
       const isTarget = panel.getAttribute("data-panel") === panelId;
@@ -54,7 +52,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   showPanel("general");
 
+  const aboutLogo = document.getElementById("aboutLogo");
+  try {
+    if (aboutLogo) aboutLogo.src = chrome.runtime.getURL("icons/icon48.png");
+  } catch (e) {
+    console.error("Failed to load logo:", e);
+  }
+
   const toggleFormatOption = () => {
+    formatCard.style.display = fileOption.checked ? "block" : "none";
     formatSetting.style.display = fileOption.checked ? "flex" : "none";
     toggleQualityOption();
   };
@@ -175,16 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (helpSupport) {
     helpSupport.addEventListener("click", (e) => {
       e.preventDefault();
-      chrome.tabs.create({ url: FEEDBACK_URL });
-    });
-  }
-
-  const feedbackLink = document.getElementById("feedbackLink");
-  if (feedbackLink) {
-    feedbackLink.href = FEEDBACK_URL;
-    feedbackLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      chrome.tabs.create({ url: FEEDBACK_URL });
+      chrome.tabs.create({ url: SUPPORT_URL });
     });
   }
 
@@ -194,6 +191,15 @@ document.addEventListener("DOMContentLoaded", () => {
     rateUsLink.addEventListener("click", (e) => {
       e.preventDefault();
       chrome.tabs.create({ url: RATE_US_URL });
+    });
+  }
+
+  const githubLink = document.getElementById("githubLink");
+  if (githubLink) {
+    githubLink.href = GITHUB_URL;
+    githubLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: GITHUB_URL });
     });
   }
 

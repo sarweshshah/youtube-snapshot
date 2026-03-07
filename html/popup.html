@@ -16,11 +16,12 @@
           class="tab is-active"
           data-panel="general"
           aria-current="page"
+          aria-label="General"
         >
           <svg
             class="tab-icon"
-            width="16"
-            height="16"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -33,13 +34,17 @@
               d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
             />
           </svg>
-          <span class="tab-label">General</span>
         </button>
-        <button type="button" class="tab" data-panel="snapshot">
+        <button
+          type="button"
+          class="tab"
+          data-panel="snapshot"
+          aria-label="Snapshot"
+        >
           <svg
             class="tab-icon"
-            width="16"
-            height="16"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -52,13 +57,17 @@
             />
             <circle cx="12" cy="13" r="4" />
           </svg>
-          <span class="tab-label">Snapshot</span>
         </button>
-        <button type="button" class="tab" data-panel="gif">
+        <button
+          type="button"
+          class="tab"
+          data-panel="gif"
+          aria-label="GIF Recording"
+        >
           <svg
             class="tab-icon"
-            width="16"
-            height="16"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -69,13 +78,17 @@
             <polygon points="23 7 16 12 23 17 23 7" />
             <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
           </svg>
-          <span class="tab-label">GIF</span>
         </button>
-        <button type="button" class="tab" data-panel="shortcuts">
+        <button
+          type="button"
+          class="tab"
+          data-panel="shortcuts"
+          aria-label="Shortcuts"
+        >
           <svg
             class="tab-icon"
-            width="16"
-            height="16"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -88,13 +101,12 @@
               d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"
             />
           </svg>
-          <span class="tab-label">Shortcuts</span>
         </button>
-        <button type="button" class="tab" data-panel="about">
+        <button type="button" class="tab" data-panel="about" aria-label="About">
           <svg
             class="tab-icon"
-            width="16"
-            height="16"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -106,7 +118,6 @@
             <path d="M12 16v-4" />
             <path d="M12 8h.01" />
           </svg>
-          <span class="tab-label">About</span>
         </button>
       </nav>
 
@@ -116,7 +127,7 @@
           data-panel="general"
           aria-labelledby="general-title"
         >
-          <h5 id="general-title" class="panel-title">General Preferences</h5>
+          <p id="general-title" class="panel-title">General Preferences</p>
           <p class="panel-subtitle">Configure global extension behavior.</p>
           <div class="section card">
             <div class="setting">
@@ -135,7 +146,7 @@
           aria-labelledby="snapshot-title"
           hidden
         >
-          <h5 id="snapshot-title" class="panel-title">Snapshot Settings</h5>
+          <p id="snapshot-title" class="panel-title">Snapshot Settings</p>
           <p class="panel-subtitle">
             Configure how images are captured and saved.
           </p>
@@ -156,7 +167,7 @@
               Enable at least one output option
             </div>
           </div>
-          <div class="section card">
+          <div class="section card" id="formatCard">
             <div class="setting" id="formatSetting" style="display: none">
               <label for="formatOption">File Format</label>
               <select id="formatOption">
@@ -194,7 +205,7 @@
           aria-labelledby="gif-title"
           hidden
         >
-          <h5 id="gif-title" class="panel-title">GIF Recording</h5>
+          <p id="gif-title" class="panel-title">GIF Recording</p>
           <p class="panel-subtitle">
             Adjust capture rate and output dimensions.
           </p>
@@ -249,7 +260,7 @@
               Processing may be slow at this size
             </div>
           </div>
-          <div class="section card">
+          <div style="padding: 2px">
             <div class="section-footer-header">ESTIMATED MAX SIZE</div>
             <div class="section-footer-content">
               <p class="section-footer-desc">
@@ -267,7 +278,7 @@
           aria-labelledby="shortcuts-title"
           hidden
         >
-          <h5 id="shortcuts-title" class="panel-title">Keyboard Shortcuts</h5>
+          <p id="shortcuts-title" class="panel-title">Keyboard Shortcuts</p>
           <p class="panel-subtitle">Quickly trigger actions while watching.</p>
           <div class="section card">
             <div class="setting setting--shortcut">
@@ -295,6 +306,8 @@
                 <span class="about-version">v<span id="version"></span></span>
               </div>
             </div>
+          </div>
+          <div class="section card about-card">
             <a href="#" id="helpSupport" class="about-link">
               <span class="about-link-icon" aria-hidden="true">
                 <svg
@@ -314,6 +327,40 @@
               </span>
               <span>Help & Support</span>
             </a>
+            <a href="#" id="rateUsLink" class="about-link" target="_blank" rel="noopener">
+              <span class="about-link-icon" aria-hidden="true">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              </span>
+              <span>Rate YouTube Snapshot</span>
+            </a>
+            <a href="#" id="githubLink" class="about-link" target="_blank" rel="noopener">
+              <span class="about-link-icon" aria-hidden="true">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                </svg>
+              </span>
+              <span>View source on GitHub</span>
+            </a>
           </div>
         </section>
       </main>
@@ -322,12 +369,6 @@
         <span class="popup-footer-notice"
           >Your data is stored locally in your browser</span
         >
-        <div class="popup-footer-links">
-          <a href="#" id="feedbackLink" target="_blank" rel="noopener"
-            >FEEDBACK</a
-          >
-          <a href="#" id="rateUsLink" target="_blank" rel="noopener">RATE US</a>
-        </div>
       </footer>
     </div>
 

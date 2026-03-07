@@ -13,8 +13,8 @@
     --kbd-border: #aaa;
     --accent: #007BFF;
     --checkbox-border: #ababab;
-    --checkbox-checked-bg: #dadada;
-    --checkbox-tick: #1a1a1a;
+    --checkbox-checked-bg: #c93333;
+    --checkbox-tick: #ffffff;
 
     --transition-fast: 0.15s ease-out;
     --radius: 6px;
@@ -63,7 +63,7 @@ body {
 .popup {
     display: flex;
     flex-direction: column;
-    min-height: 400px;
+    min-height: 420px;
 }
 
 /* --- Tab bar --- */
@@ -84,17 +84,14 @@ body {
 
 .tab {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
     flex: 1;
     min-width: 0;
-    padding: 8px 4px 6px;
+    padding: 10px 4px;
     border: none;
     background: none;
     font-family: inherit;
-    font-size: 10px;
     color: var(--text-tertiary);
     cursor: pointer;
     transition: color var(--transition-fast), background-color var(--transition-fast);
@@ -119,26 +116,18 @@ body {
 }
 
 .tab.is-active {
-    color: var(--text-primary);
+    color: #C93333;
 }
 
 .tab.is-active::after {
-    background: var(--text-primary);
+    background: #C93333;
 }
 
 .tab-icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
     overflow: visible;
-}
-
-.tab-label {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    line-height: 1;
 }
 
 /* --- Main content --- */
@@ -164,7 +153,7 @@ body {
 }
 
 .panel-title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     margin: 0 0 2px;
     color: var(--text-primary);
@@ -182,9 +171,9 @@ body {
 .about-card {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    padding: 20px;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 16px;
 }
 
 .about-header {
@@ -194,8 +183,8 @@ body {
 }
 
 .about-logo {
-    width: 48px;
-    height: 48px;
+    width: 32px;
+    height: 32px;
     object-fit: contain;
 }
 
@@ -275,7 +264,7 @@ body {
 }
 
 .setting + .setting {
-    margin-top: 4px;
+    margin-top: 8px;
 }
 
 .setting label {
@@ -566,7 +555,7 @@ kbd {
     font-family: var(--mono);
     font-size: 12px;
     font-weight: 600;
-    padding: 2px 8px;
+    padding: 4px 8px;
     min-width: 20px;
     text-align: center;
     color: var(--text-tertiary);
@@ -591,21 +580,6 @@ kbd {
 .popup-footer-notice {
     flex: 1;
     min-width: 0;
-    text-align: left;
-    color: var(--text-secondary);
-}
-
-.popup-footer-links {
-    display: flex;
-    gap: 12px;
-    flex-shrink: 0;
-}
-
-.popup-footer-links a {
-    color: var(--text-secondary);
-    text-decoration: none;
-}
-
-.popup-footer-links a:hover {
-    color: var(--text-primary);
+    text-align: center;
+    color: var(--text-tertiary);
 }

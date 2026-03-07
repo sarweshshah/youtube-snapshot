@@ -1,0 +1,15 @@
+{
+  "name": "youtube-snapshot",
+  "version": "1.5.1",
+  "description": "Take snapshots of YouTube videos and save to clipboard or file.",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js"
+  },
+  "devDependencies": {
+    "clean-css": "^5.3.3",
+    "html-minifier-terser": "^7.2.0",
+    "sharp": "^0.34.5",
+    "terser": "^5.27.0"
+  }
+}

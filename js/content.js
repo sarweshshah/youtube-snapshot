@@ -1,7 +1,7 @@
 // content.js - Injects snapshot button, handles keyboard shortcuts, and GIF recording on YouTube
 
 let currentShortcutKey = "s";
-let gifRecorder = new GIFRecorder();
+let gifRecorder = null;
 let currentNotification = null;
 let activePlayer = null;
 let lastSnapshotTime = 0;
@@ -11,8 +11,6 @@ let recordingTimerInterval = null;
 const SNAPSHOT_DEBOUNCE_MS = 300;
 
 // --- Initialization ---
-
-injectButtons();
 
 window.onload = function () {
   loadUserSettings();
@@ -40,19 +38,20 @@ function loadUserSettings() {
 
 // --- DOM observation ---
 
-const observer = new MutationObserver((mutations) => {
-  for (const mutation of mutations) {
-    if (
-      (mutation.type === "childList" || mutation.type === "attributes") &&
-      document.querySelector(".ytp-right-controls")
-    ) {
+let injectDebounceTimer = null;
+
+const observer = new MutationObserver(() => {
+  if (injectDebounceTimer) return;
+  injectDebounceTimer = setTimeout(() => {
+    injectDebounceTimer = null;
+    if (document.querySelector(".ytp-right-controls")) {
       injectButtons();
     }
-  }
+  }, 200);
 });
 
 function observePage() {
-  observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+  observer.observe(document.body, { childList: true, subtree: true });
 }
 
 // --- Player helpers ---
@@ -140,7 +139,7 @@ function setupFullscreenListener() {
 function setupSPANavigationListener() {
   document.addEventListener("yt-navigate-finish", () => {
     activePlayer = null;
-    if (gifRecorder.isRecording()) {
+    if (gifRecorder?.isRecording()) {
       removeVideoPauseListeners();
       removeRecordingIndicator();
       gifRecorder.cancelRecording();
@@ -209,14 +208,13 @@ function isBlackFrame(canvas) {
   const ctx = canvas.getContext("2d");
   const w = canvas.width;
   const h = canvas.height;
-  const points = [
-    [0.25, 0.25], [0.5, 0.25], [0.75, 0.25],
-    [0.25, 0.5],  [0.5, 0.5],  [0.75, 0.5],
-    [0.25, 0.75], [0.5, 0.75], [0.75, 0.75],
-  ];
-  for (const [px, py] of points) {
-    const pixel = ctx.getImageData(Math.floor(w * px), Math.floor(h * py), 1, 1).data;
-    if (pixel[0] + pixel[1] + pixel[2] > 15) return false;
+  const data = ctx.getImageData(0, 0, w, h).data;
+  const points = [0.25, 0.5, 0.75];
+  for (const py of points) {
+    for (const px of points) {
+      const idx = (Math.floor(h * py) * w + Math.floor(w * px)) * 4;
+      if (data[idx] + data[idx + 1] + data[idx + 2] > 15) return false;
+    }
   }
   return true;
 }
@@ -337,13 +335,28 @@ function showRecordingIndicator(video) {
   recordingIndicator = indicator;
 
   const recStartTime = gifRecorder.startTime;
+  let totalPausedMs = 0;
+  let pausedAt = null;
+
   recordingTimerInterval = setInterval(() => {
     if (!gifRecorder.isRecording()) {
       removeRecordingIndicator();
       return;
     }
 
-    const elapsed = Math.floor((Date.now() - recStartTime) / 1000);
+    const now = Date.now();
+    let elapsedMs;
+    if (video.paused) {
+      if (pausedAt === null) pausedAt = now;
+      elapsedMs = (pausedAt - recStartTime) - totalPausedMs;
+    } else {
+      if (pausedAt !== null) {
+        totalPausedMs += now - pausedAt;
+        pausedAt = null;
+      }
+      elapsedMs = (now - recStartTime) - totalPausedMs;
+    }
+    const elapsed = Math.max(0, Math.floor(elapsedMs / 1000));
     const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
     const secs = String(elapsed % 60).padStart(2, "0");
     const timerEl = indicator.querySelector(".yt-snapshot-rec-timer");
@@ -383,46 +396,60 @@ function removeRecordingIndicator(immediate) {
 
 // --- GIF recording ---
 
-function handleGifRecording(video) {
+async function getGifRecorder() {
+  if (gifRecorder) return gifRecorder;
+  const response = await chrome.runtime.sendMessage({ type: "inject-gif-recorder" });
+  if (!response?.ok) throw new Error(response?.error || "Failed to inject GIF recorder");
+  gifRecorder = new GIFRecorder();
+  return gifRecorder;
+}
+
+async function handleGifRecording(video) {
   if (isAdPlaying(video)) {
     showNotification("Capture unavailable during ads", "info");
     return;
   }
 
-  if (!gifRecorder.isRecording()) {
-    if (!gifRecorder.startRecording(video)) {
-      showNotification("Failed to start GIF recording", "error");
-      return;
-    }
+  try {
+    const rec = await getGifRecorder();
+    if (!rec.isRecording()) {
+      if (!rec.startRecording(video)) {
+        showNotification("Failed to start GIF recording", "error");
+        return;
+      }
 
-    showNotification("GIF recording started", "info");
-    showRecordingIndicator(video);
+      showNotification("GIF recording started", "info");
+      showRecordingIndicator(video);
 
-    const onAutoStop = () => {
-      document.removeEventListener("gifAutoStopped", onAutoStop);
+      const onAutoStop = () => {
+        document.removeEventListener("gifAutoStopped", onAutoStop);
+        removeVideoPauseListeners();
+        removeRecordingIndicator();
+        showGifProcessingUI();
+      };
+      document.addEventListener("gifAutoStopped", onAutoStop);
+
+      const onPause = () => {
+        if (gifRecorder.isRecording()) showNotification("Recording paused", "info");
+      };
+      const onPlay = () => {
+        if (gifRecorder.isRecording()) showNotification("Recording resumed", "info");
+      };
+      video.addEventListener("pause", onPause);
+      video.addEventListener("play", onPlay);
+      gifRecorder._videoPauseCleanup = () => {
+        video.removeEventListener("pause", onPause);
+        video.removeEventListener("play", onPlay);
+      };
+    } else {
       removeVideoPauseListeners();
       removeRecordingIndicator();
+      gifRecorder.stopRecording();
       showGifProcessingUI();
-    };
-    document.addEventListener("gifAutoStopped", onAutoStop);
-
-    const onPause = () => {
-      if (gifRecorder.isRecording()) showNotification("Recording paused", "info");
-    };
-    const onPlay = () => {
-      if (gifRecorder.isRecording()) showNotification("Recording resumed", "info");
-    };
-    video.addEventListener("pause", onPause);
-    video.addEventListener("play", onPlay);
-    gifRecorder._videoPauseCleanup = () => {
-      video.removeEventListener("pause", onPause);
-      video.removeEventListener("play", onPlay);
-    };
-  } else {
-    removeVideoPauseListeners();
-    removeRecordingIndicator();
-    gifRecorder.stopRecording();
-    showGifProcessingUI();
+    }
+  } catch (err) {
+    console.error("GIF recording error:", err);
+    showNotification("Failed to start GIF recording", "error");
   }
 }
 

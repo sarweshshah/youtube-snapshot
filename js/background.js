@@ -28,6 +28,21 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Messages targeted at the offscreen doc — skip entirely in the service worker
   if (msg.target === "offscreen") return;
 
+  if (msg.type === "inject-gif-recorder") {
+    if (!sender.tab?.id) {
+      sendResponse({ ok: false, error: "No tab" });
+      return;
+    }
+    chrome.scripting
+      .executeScript({
+        target: { tabId: sender.tab.id },
+        files: ["js/libs/gif-recorder.js"],
+      })
+      .then(() => sendResponse({ ok: true }))
+      .catch((err) => sendResponse({ ok: false, error: err.message }));
+    return true;
+  }
+
   if (msg.type === "create-offscreen") {
     ensureOffscreenDocument()
       .then(() => sendResponse({ ready: true, tabId: sender.tab?.id }))

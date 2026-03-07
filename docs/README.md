@@ -1,3 +1,5 @@
+![YouTube Snapshot logo](../icons/icon128.png)
+
 # Youtube Snapshot
 
 Capture and Save YouTube Moments with Ease

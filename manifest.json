@@ -1,13 +1,10 @@
 {
   "manifest_version": 3,
   "name": "YouTube Snapshot",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Take snapshots of YouTube videos and save to clipboard or file.",
   "permissions": ["storage", "offscreen", "activeTab"],
-  "host_permissions": [
-    "*://*.youtube.com/*",
-    "*://*.youtube-nocookie.com/*"
-  ],
+  "host_permissions": ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"],
   "background": {
     "service_worker": "js/background.js"
   },

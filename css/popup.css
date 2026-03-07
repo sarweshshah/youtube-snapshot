@@ -532,16 +532,21 @@ kbd {
     font-family: inherit;
     font-size: 12px;
     font-weight: 500;
-    color: var(--text-primary);
-    background-color: var(--input-bg);
-    border: 1px solid var(--border-color);
+    color: #fff;
+    background-color: #C93333;
+    border: 1px solid #C93333;
     border-radius: var(--radius);
     cursor: pointer;
     transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
+.panel[data-panel="general"] .btn-restore {
+    margin-top: auto;
+}
+
 .btn-restore:hover {
-    background-color: var(--kbd-bg);
+    background-color: #b72c2c;
+    border-color: #b72c2c;
 }
 
 /* --- Shortcut key pill --- */

@@ -1,64 +1,81 @@
-# YouTube Snapshot
+# Youtube Snapshot
 
-Capture YouTube frames as images and short moments as GIFs.
+Capture and Save YouTube Moments with Ease
 
-This extension adds a Snapshot button to YouTube players (including embeds) so you can save the current frame or record a quick GIF.
+YouTube Snapshot is a lightweight Chrome extension that adds a Snapshot button to YouTube players, including embedded players. It lets you quickly capture a frame as an image or record a short GIF clip without leaving the page.
 
-## Features
+## Key Features
 
-- One-click snapshot capture
-- GIF recording with keyboard shortcut (`g`)
-- Save as PNG/JPG and optionally copy to clipboard
-- Configurable format, quality, sound, framerate, duration, and width
-- Timestamped filenames using video title + time
+- **One-Click Snapshots**: Capture screenshots from the current video frame.
+- **GIF Recording**: Start and stop GIF capture quickly with `g`.
+- **Flexible Save Options**: Save captures as PNG/JPG and optionally copy images to clipboard.
+- **Customizable Settings**: Configure quality, sound, frame rate, max GIF duration, and width.
+- **Smart File Naming**: Uses video title and timestamp for easier organization.
+- **Embedded Video Support**: Works on YouTube and supported embedded YouTube players.
 
 ## Repository Structure
 
 ![Repository structure](repo%20structure.png)
 
-| Script | Role |
-|------|------|
-| `background.js` | Creates offscreen document when needed and relays messages between tab and offscreen contexts. |
-| `content.js` | Injects UI in YouTube pages/embeds, handles shortcuts, captures PNG/JPG snapshots, starts/stops GIF recording. |
-| `gif-recorder.js` | Captures frames, sends them for encoding, receives chunks/progress, and finalizes GIF download. |
-| `offscreen.js` | Encodes GIF frames via `gif.js` workers and returns progress/chunks to the active tab. |
-| `popup.js` | Reads/writes `chrome.storage.sync` settings for snapshots and GIF behavior. |
+## Technical Documentation
 
-## Script Flow
-
-### Snapshot (PNG/JPG)
-
-![Snapshot script flow](snapshot%20script%20flow.png)
-
-Snapshot capture runs entirely in `content.js` and does not use offscreen encoding.
-
-### GIF recording and encoding
-
-![GIF recording sequence](sequence%20diagram.png)
-
-`popup.js` only updates settings in `chrome.storage.sync`; capture and encoding scripts read those values at runtime.
+Script responsibilities, snapshot/GIF runtime flow, and implementation details are documented in [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ## Privacy Policy
 
-The extension does not collect, store, or transmit personal data. All capture and GIF processing happens locally in your browser.
+This Privacy Policy describes how the YouTube Snapshot Chrome extension ("the Extension") handles information.
 
-### Permissions used
+### Information We Collect
 
-- `storage`: save user preferences
-- `webNavigation`: detect embedded YouTube contexts
-- `scripting`: inject capture UI/logic in player pages
-- Host permissions: access YouTube players on supported pages
+The Extension does **not** collect, store, or transmit personal information, account credentials, browsing history, or captured media to external servers.
 
-### Data handling
+All snapshot and GIF operations are performed locally in your browser context. Captured files are only saved based on your chosen actions (download and/or clipboard copy).
 
-- No third-party sharing
-- No external upload of captures
-- Policy updates are posted on the Chrome Web Store page
+### Permissions and Why They Are Required
 
-**Effective date:** October 12, 2024
+The Extension requests only the permissions needed for core functionality:
+
+- **`storage`**: Stores your preferences, such as capture format, quality, sound effects, GIF frame rate, and duration.
+- **`webNavigation`**: Detects and supports YouTube embeds and iframe contexts where standard page lifecycle hooks are insufficient.
+- **`scripting`**: Injects runtime capture logic into supported YouTube player pages/frames.
+- **Host permissions**: Allows the Extension to interact with supported YouTube player surfaces so capture controls can function.
+
+### How Information Is Used
+
+Any locally available context (for example, video title and timestamp) is used only to generate filenames and complete capture actions initiated by you.
+
+The Extension does not profile users, track activity across sites for analytics, or build behavioral records.
+
+### Data Storage and Retention
+
+- Preference data is saved in browser-managed extension storage (`chrome.storage.sync`).
+- Captured images/GIFs are stored only where your browser saves downloads or where you paste clipboard content.
+- The Extension does not maintain remote databases or cloud backups.
+
+### Third-Party Sharing
+
+The Extension does not sell, rent, or share personal data with third parties.
+
+No capture content is transmitted to third-party APIs, ad networks, or analytics providers by the Extension.
+
+### Security
+
+Because processing is local and no personal data pipeline is maintained by the Extension, exposure risk is minimized.
+
+The codebase is maintained to support intended behavior only, and permissions are scoped to functional requirements.
+
+### Policy Updates
+
+This Privacy Policy may be updated over time to reflect product, platform, or compliance changes. Updated policy text is published on the Extension's Chrome Web Store listing and/or repository documentation.
+
+### Contact
+
+If you have questions about this Privacy Policy, contact us through the Chrome Web Store listing.
+
+**Effective Date:** October 12, 2024
 
 [![Download YouTube Snapshot extension](banner.png)](https://chromewebstore.google.com/detail/youtube-snapshot/cpecoochkebbnkkonbjikioehccfclfa)
 
 ## License
 
-All rights reserved. Unauthorized copying, modification, distribution, or use is prohibited without prior written permission from the author.
+All rights reserved. Unauthorized copying, modification, distribution, or use of this project, via any medium, is strictly prohibited without prior written permission from the author.

@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const gifEstimate = document.getElementById("gifEstimate");
   const gifWarning = document.getElementById("gifWarning");
 
-  const gifWidthValues = [480, 720, 1080];
+  const gifWidthValues = [480, 720, 1080, 1440];
 
   const tabs = document.querySelectorAll(".tab[data-panel]");
   const panels = document.querySelectorAll(".panel[data-panel]");
